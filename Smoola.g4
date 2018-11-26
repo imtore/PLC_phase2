@@ -1,13 +1,15 @@
 grammar Smoola;
 
 @members{
-    Program prog = new Program();
     void print(Object obj){
             System.out.println(obj);
      }
 }
 
     program:
+        {
+            Program prog = new Program();
+        }
         mc = mainClass (cd = classDeclaration{prog.addClass($cd.classdec);})* EOF
         {
             prog.setMainClass($mc.mainclass);
@@ -79,69 +81,83 @@ grammar Smoola;
         }
     ;
     statementAssignment returns [Expression ex]:
-        exp = expression ';'
+        exp = expression ';'{$ex=$exp.ex;}
     ;
 
     expression returns [Expression ex]:
-		expasgn = expressionAssignment {$ex = $expasgn.ex}
+		expasgn = expressionAssignment {$ex = $expasgn.ex;}
 	;
 
-    expressionAssignment returns [Expression ex]:
-		expleft = expressionOr '=' expright = expressionAssignment {$ex = new BinaryExpression($expleft.expor, $expright.ex, assign) }//how to pass binary operator
-	    |	exp = expressionOr {$ex = $exp.expor}
+    expressionAssignment returns [Expression ex]://binary operation still needs to be handled
+		expleft = expressionOr '=' expright = expressionAssignment {$ex = new BinaryExpression($expleft.expor, $expright.ex, assign); }//how to pass binary operator
+	    |	exp = expressionOr {$ex = $exp.expor;}
 	;
 
     expressionOr returns [Expression expor]:
-		expleft = expressionAnd ex = expressionOrTemp[$expleft]{$expor = $ex.ex}
+		expleft = expressionAnd ex = expressionOrTemp[$expleft.expand]{$expor = $ex.ex;}
 	;
 
     expressionOrTemp[Expression leftside] returns [Expression ex]:
-		'||' expright = expressionAnd
+		'||' expright = expressionAnd//binary operation still needs to be handled
 		{
-		    Expression expleft = new BinaryExpression($leftside,$expright.expand,or)
+		    Expression expleft = new BinaryExpression($leftside,$expright.expand,or;)
 		}
 		exp = expressionOrTemp[expleft]
 		{
-		    $ex=$exp.ex
+		    $ex=$exp.ex;
 		}
-	    |   {$ex = $leftside}
+	    |   {$ex = $leftside;}
 	;
 
     expressionAnd returns[Expression expand]:
-		expleft = expressionEq ex = expressionAndTemp[$expleft]{$expand = $ex.ex}
+		expleft = expressionEq ex = expressionAndTemp[$expleft.expeq]{$expand = $ex.ex;}
 	;
 
-    expressionAndTemp[Expression leftside] returns [Expression ex]:
-		'&&' expright = expressionEq
+    expressionAndTemp [Expression leftside] returns [Expression ex]:
+		'&&' expright = expressionEq//binary operation still needs to be handled
 		 {
-            Expression expleft = new BinaryExpression($leftside,$expright.expand,and)
+            Expression expleft = new BinaryExpression($leftside,$expright.expeq,and;)
          }
 		 exp = expressionAndTemp[expleft]
 		 {
-            $ex=$exp.ex
+            $ex=$exp.ex;
          }
-	    |   {$ex = $leftside}
+	     |   {$ex = $leftside;}
 	;
 
-    expressionEq:
-		expressionCmp expressionEqTemp
+    expressionEq returns [Expression expeq]:
+		expleft = expressionCmp ex = expressionEqTemp[$expleft.expcmp]{$expeq = $ex.ex;}
 	;
 
-    expressionEqTemp:
-		('==' | '<>') expressionCmp expressionEqTemp
-	    |
+    expressionEqTemp [Expression leftside] returns [Expression ex]:
+		('==' | '<>') expright = expressionCmp//binary operation still needs to be handled
+		{
+		    Expression expleft = new BinaryExpression($leftside,$expright.expcmp,eq);
+		}
+		exp = expressionEqTemp[expleft]
+		{
+		    $ex=$exp.ex;
+		}
+	    |   {$ex = $leftside;}
 	;
 
-    expressionCmp:
-		expressionAdd expressionCmpTemp
+    expressionCmp returns [Expression expcmp]:
+		expleft = expressionAdd ex = expressionCmpTemp[$expleft.expadd]{$expeq = $ex.ex;}
 	;
 
-    expressionCmpTemp:
-		('<' | '>') expressionAdd expressionCmpTemp
-	    |
+    expressionCmpTemp [Expression leftside] returns [Expression ex]:
+		('<' | '>') expright = expressionAdd//binary operation still needs to be handled
+		{
+		    Expression expleft = new BinaryExpression($leftside,$expright.expadd,eq);
+		}
+		exp = expressionCmpTemp[expleft]
+		{
+            $ex=$exp.ex;
+        }
+	    |   {$ex = $leftside;}
 	;
 
-    expressionAdd:
+    expressionAdd returns [Expression expadd]:
 		expressionMult expressionAddTemp
 	;
 
