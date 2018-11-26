@@ -80,8 +80,8 @@ grammar Smoola;
             $writeln = new Write($arg.ex);
         }
     ;
-    statementAssignment returns [Expression ex]:
-        exp = expression ';'{$ex=$exp.ex;}
+    statementAssignment returns [Assign asgn]:
+        exp = expression ';'//how to give this piece of shit lvalue and rvalue
     ;
 
     expression returns [Expression ex]:
@@ -148,7 +148,7 @@ grammar Smoola;
     expressionCmpTemp [Expression leftside] returns [Expression ex]:
 		('<' | '>') expright = expressionAdd//binary operation still needs to be handled
 		{
-		    Expression expleft = new BinaryExpression($leftside,$expright.expadd,eq);
+		    Expression expleft = new BinaryExpression($leftside,$expright.expadd,cmp);
 		}
 		exp = expressionCmpTemp[expleft]
 		{
@@ -158,15 +158,22 @@ grammar Smoola;
 	;
 
     expressionAdd returns [Expression expadd]:
-		expressionMult expressionAddTemp
+		expleft = expressionMult ex = expressionAddTemp[$expleft.expmult]{$expeq = $ex.ex;}
 	;
 
-    expressionAddTemp:
-		('+' | '-') expressionMult expressionAddTemp
-	    |
+    expressionAddTemp [Expression leftside] returns [Expression ex]:
+		('+' | '-') expright = expressionMult//binary operation still needs to be handled
+		{
+		    Expression expleft = new BinaryExpression($leftside,$expright.expmult,add);
+		}
+		exp = expressionAddTemp[expleft]
+		{
+		    $ex=$exp.ex;
+		}
+	    |   {$ex = $leftside;}
 	;
 
-    expressionMult:
+    expressionMult returns [Expression expmult]:
         expressionUnary expressionMultTemp
 	;
 
