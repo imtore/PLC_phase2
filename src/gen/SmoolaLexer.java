@@ -88,6 +88,12 @@ public class SmoolaLexer extends Lexer {
 	}
 
 
+	    Program prog = new Program();
+	    void print(Object obj){
+	            System.out.println(obj);
+	     }
+
+
 	public SmoolaLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);

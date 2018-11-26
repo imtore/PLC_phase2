@@ -78,35 +78,49 @@ grammar Smoola;
             $writeln = new Write($arg.ex);
         }
     ;
-    statementAssignment returns [Expression ]:
+    statementAssignment returns [Expression ex]:
         exp = expression ';'
     ;
 
-    expression returns[Expression ex]:
-		expressionAssignment
+    expression returns [Expression ex]:
+		expasgn = expressionAssignment {$ex = $expasgn.ex}
 	;
 
-    expressionAssignment:
-		expressionOr '=' expressionAssignment
-	    |	expressionOr
+    expressionAssignment returns [Expression ex]:
+		expleft = expressionOr '=' expright = expressionAssignment {$ex = new BinaryExpression($expleft.expor, $expright.ex, assign) }//how to pass binary operator
+	    |	exp = expressionOr {$ex = $exp.expor}
 	;
 
-    expressionOr:
-		expressionAnd expressionOrTemp
+    expressionOr returns [Expression expor]:
+		expleft = expressionAnd ex = expressionOrTemp[$expleft]{$expor = $ex.ex}
 	;
 
-    expressionOrTemp:
-		'||' expressionAnd expressionOrTemp
-	    |
+    expressionOrTemp[Expression leftside] returns [Expression ex]:
+		'||' expright = expressionAnd
+		{
+		    Expression expleft = new BinaryExpression($leftside,$expright.expand,or)
+		}
+		exp = expressionOrTemp[expleft]
+		{
+		    $ex=$exp.ex
+		}
+	    |   {$ex = $leftside}
 	;
 
-    expressionAnd:
-		expressionEq expressionAndTemp
+    expressionAnd returns[Expression expand]:
+		expleft = expressionEq ex = expressionAndTemp[$expleft]{$expand = $ex.ex}
 	;
 
-    expressionAndTemp:
-		'&&' expressionEq expressionAndTemp
-	    |
+    expressionAndTemp[Expression leftside] returns [Expression ex]:
+		'&&' expright = expressionEq
+		 {
+            Expression expleft = new BinaryExpression($leftside,$expright.expand,and)
+         }
+		 exp = expressionAndTemp[expleft]
+		 {
+            $ex=$exp.ex
+         }
+	    |   {$ex = $leftside}
 	;
 
     expressionEq:
@@ -136,8 +150,8 @@ grammar Smoola;
 	    |
 	;
 
-        expressionMult:
-		expressionUnary expressionMultTemp
+    expressionMult:
+        expressionUnary expressionMultTemp
 	;
 
     expressionMultTemp:
