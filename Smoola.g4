@@ -27,7 +27,7 @@ grammar Smoola;
             for (int counter = 0; counter < $body.stmtlist.size(); counter++) {
                 mainmethod.addStatement($body.stmtlist.get(counter));
             }
-            main_method.setReturnValue($return_value.ex);//change
+            main_method.setReturnValue($return_value.expobj);
             $mainclassobj = new ClassDeclaration(new Identifier($class_name.getText()),null);
             $mainclassobj.addMethodDeclaration(main_method);
         }
@@ -72,7 +72,7 @@ grammar Smoola;
             for (int counter = 0; counter < $body.stmtlist.size(); counter++) {
                 $methoddecobj.addStatement($body.stmtlist.get(counter));
             }
-            $methoddecobj.setReturnValue($return_value.ex);
+            $methoddecobj.setReturnValue($return_value.expobj);
         }
     ;
     statements returns[ArrayList<Statement> stmtlist]:
@@ -97,185 +97,185 @@ grammar Smoola;
     statementCondition returns [Conditional conditionalobj]:
         'if' '('condition = expression')' 'then' consequencebody = statement
         {
-            $conditionalobj = new Conditional($condition.ex, $consequencebody.stmtobj);
+            $conditionalobj = new Conditional($condition.expobj, $consequencebody.stmtobj);
         }
-         ('else' alternativebody = statement {$conditional.setAlternativeBody($alternativebody.stmtobj);})?
+         ('else' alternativebody = statement {$conditionalobj.setAlternativeBody($alternativebody.stmtobj);})?
     ;
     statementLoop returns [While whileobj]:
         'while' '(' condition = expression ')' body = statement
         {
-            $whileobj = new While($condition.ex, $body.stmtobj);
+            $whileobj = new While($condition.expobj, $body.stmtobj);
         }
     ;
     statementWrite returns [Write writelnobj]:
         'writeln(' arg = expression ')' ';'
         {
-            $writelnobj = new Write($arg.ex);
+            $writelnobj = new Write($arg.expobj);
         }
     ;
     statementAssignment returns [Assign asgnobj]:
         exp = expression ';'
         {
-            if($exp.leftsidenull){
-                $asgn = new Assign($exp.ex.getLeft(), $exp.ex.getRight());
+            if($exp.isAssignStatement){
+                $asgnobj = new Assign($exp.expobj.getLeft(), $exp.expobj.getRight());
             }
             else
             {
-                $asgn = new Assign(null, $exp.ex.getRight());
+                $asgnobj = new Assign(null, $exp.expobj.getRight());
             }
         }
     ;
 
-    expression returns [Expression ex,Boolean leftsidenull]:
-		expasgn = expressionAssignment
+    expression returns [Expression expobj,Boolean isAssignStatement]:
+		exp = expressionAssignment
 		{
-		    $ex = $expasgn.ex;
-		    $leftsidenull=!$expasgn.twosided
+		    $expobj = $exp.expasgn;
+		    $isAssignStatement = !$exp.isAssignExp
 		}
 	;
 
-    expressionAssignment returns [Expression ex, Boolean twosided]://binary operation still needs to be handled
+    expressionAssignment returns [Expression expasgn, Boolean isAssignExp]://binary operation still needs to be handled
 		expleft = expressionOr '=' expright = expressionAssignment
 		{
-		    $ex = new BinaryExpression($expleft.expor, $expright.ex, BinaryOperator.assign);
-		    $twosided=True;
+		    $expasgn = new BinaryExpression($expleft.expor, $expright.expasgn, BinaryOperator.assign);
+		    $isAssignExp = True;
 		}
 	    |	exp = expressionOr
 	    {
-	        $ex = $exp.expor;
-	        $twosided=False;
+	        $expasgn = $exp.expor;
+	        $isAssignExp = False;
 	    }
 	;
 
     expressionOr returns [Expression expor]:
-		expleft = expressionAnd ex = expressionOrTemp[$expleft.expand]{$expor = $ex.ex;}
+		expleft = expressionAnd rest = expressionOrTemp[$expleft.expand]{$expor = $rest.fullexp;}
 	;
 
-    expressionOrTemp[Expression leftside] returns [Expression ex]:
-		'||' expright = expressionAnd//binary operation still needs to be handled
+    expressionOrTemp[Expression leftside] returns [Expression fullexp]:
+		'||' expright = expressionAnd
 		{
-		    Expression expleft = new BinaryExpression($leftside,$expright.expand,BinaryOperator.or;)
+		    Expression leftmostexp = new BinaryExpression($leftside, $expright.expand, BinaryOperator.or);
 		}
-		exp = expressionOrTemp[expleft]
+		exp = expressionOrTemp[leftmostexp]
 		{
-		    $ex=$exp.ex;
+		    $fullexp = $exp.fullexp;
 		}
-	    |   {$ex = $leftside;}
+	    |   {$fullexp = $leftside;}
 	;
 
     expressionAnd returns[Expression expand]:
-		expleft = expressionEq ex = expressionAndTemp[$expleft.expeq]{$expand = $ex.ex;}
+		expleft = expressionEq rest = expressionAndTemp[$expleft.expeq]{$expand = $rest.fullexp;}
 	;
 
-    expressionAndTemp [Expression leftside] returns [Expression ex]:
-		'&&' expright = expressionEq//binary operation still needs to be handled
+    expressionAndTemp [Expression leftside] returns [Expression fullexp]:
+		'&&' expright = expressionEq
 		 {
-            Expression expleft = new BinaryExpression($leftside,$expright.expeq,BinaryOperator.and;)
+            Expression leftmostexp = new BinaryExpression($leftside, $expright.expeq, BinaryOperator.and);
          }
-		 exp = expressionAndTemp[expleft]
+		 exp = expressionAndTemp[leftmostexp]
 		 {
-            $ex=$exp.ex;
+            $fullexp = $exp.fullexp;
          }
-	     |   {$ex = $leftside;}
+	     |   {$fullexp = $leftside;}
 	;
 
     expressionEq returns [Expression expeq]:
-		expleft = expressionCmp ex = expressionEqTemp[$expleft.expcmp]{$expeq = $ex.ex;}
+		expleft = expressionCmp rest = expressionEqTemp[$expleft.expcmp]{$expeq = $rest.fullexp;}
 	;
 
-    expressionEqTemp [Expression leftside] returns [Expression ex]:
-		(op = '==' | op = '<>') expright = expressionCmp//binary operation still needs to be handled
+    expressionEqTemp [Expression leftside] returns [Expression fullexp]:
+		(op = '==' | op = '<>') expright = expressionCmp
 		{
-		    if($op=='==')
+		    if($op == '==')
 		    {
-		        Expression expleft = new BinaryExpression($leftside,$expright.expcmp,BinaryOperator.eq);
+		        Expression leftmostexp = new BinaryExpression($leftside, $expright.expcmp, BinaryOperator.eq);
 		    }
 		    else
 		    {
-		        Expression expleft = new BinaryExpression($leftside,$expright.expcmp,BinaryOperator.neq);
+		        Expression leftmostexp = new BinaryExpression($leftside, $expright.expcmp, BinaryOperator.neq);
 		    }
 
 		}
-		exp = expressionEqTemp[expleft]
+		exp = expressionEqTemp[leftmostexp]
 		{
-		    $ex=$exp.ex;
+		    $fullexp = $exp.fullexp;
 		}
-	    |   {$ex = $leftside;}
+	    |   {$fullexp = $leftside;}
 	;
 
     expressionCmp returns [Expression expcmp]:
-		expleft = expressionAdd ex = expressionCmpTemp[$expleft.expadd]{$expcmp = $ex.ex;}
+		expleft = expressionAdd rest = expressionCmpTemp[$expleft.expadd]{$expcmp = $rest.fullexp;}
 	;
 
-    expressionCmpTemp [Expression leftside] returns [Expression ex]:
-		(op = '<' | op = '>') expright = expressionAdd//binary operation still needs to be handled
+    expressionCmpTemp [Expression leftside] returns [Expression fullexp]:
+		(op = '<' | op = '>') expright = expressionAdd
 		{
-		    if($op=='<')
-                {
-                    Expression expleft = new BinaryExpression($leftside,$expright.expadd,BinaryOperator.lt);
-                }
-                else
-                {
-                    Expression expleft = new BinaryExpression($leftside,$expright.expadd,BinaryOperator.gt);
-                }
+		    if($op == '<')
+            {
+                Expression leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.lt);
+            }
+            else
+            {
+                Expression leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.gt);
+            }
 		}
-		exp = expressionCmpTemp[expleft]
+		exp = expressionCmpTemp[leftmostexp]
 		{
-            $ex=$exp.ex;
+            $fullexp = $exp.fullexp;
         }
-	    |   {$ex = $leftside;}
+	    |   {$fullexp = $leftside;}
 	;
 
     expressionAdd returns [Expression expadd]:
-		expleft = expressionMult ex = expressionAddTemp[$expleft.expmult]{$expadd = $ex.ex;}
+		expleft = expressionMult rest = expressionAddTemp[$expleft.expmult]{$expadd = $rest.fullexp;}
 	;
 
-    expressionAddTemp [Expression leftside] returns [Expression ex]:
-		(op = '+' | op = '-') expright = expressionMult//binary operation still needs to be handled
+    expressionAddTemp [Expression leftside] returns [Expression fullexp]:
+		(op = '+' | op = '-') expright = expressionMult
 		{
-		    if($op=='+')
-                {
-                    Expression expleft = new BinaryExpression($leftside,$expright.expmult,BinaryOperator.add);
-                }
-                else
-                {
-                    Expression expleft = new BinaryExpression($leftside,$expright.expmult,BinaryOperator.sub);
-                }
+		    if($op == '+')
+            {
+                Expression leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.add);
+            }
+            else
+            {
+                Expression leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.sub);
+            }
 		}
-		exp = expressionAddTemp[expleft]
+		exp = expressionAddTemp[leftmostexp]
 		{
-		    $ex=$exp.ex;
+		    $fullexp = $exp.fullexp;
 		}
-	    |   {$ex = $leftside;}
+	    |   {$fullexp = $leftside;}
 	;
 
     expressionMult returns [Expression expmult]:
-        expleft = expressionUnary ex = expressionMultTemp[$expleft.expun]{$expmult = $ex.ex;}
+        expleft = expressionUnary rest = expressionMultTemp[$expleft.expun]{$expmult = $rest.fullexp;}
 	;
 
-    expressionMultTemp[Expression leftside] returns [Expression ex]:
+    expressionMultTemp[Expression leftside] returns [Expression fullexp]:
 		(op = '*' | op = '/') expright = expressionUnary
 		{
-		    if($op=='*')
+		    if($op == '*')
                 {
-                    Expression expleft = new BinaryExpression($leftside,$expright.expun,BinaryOperator.mult);
+                    Expression leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.mult);
                 }
                 else
                 {
-                    Expression expleft = new BinaryExpression($leftside,$expright.expun,BinaryOperator.div);
+                    Expression leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.div);
                 }
 		}
-		exp = expressionMultTemp[expleft]
+		exp = expressionMultTemp[leftmostexp]
 		{
-		    $ex=$exp.ex;
+		    $fullexp = $exp.fullexp;
         }
-	    |   {$ex = $leftside;}
+	    |   {$fullexp = $leftside;}
 	;
 
     expressionUnary returns [Expression expun]:
 		(op = '!' | op = '-') exp1 = expressionUnary
 		{
-		    if(op=='!'){
+		    if(op == '!'){
 		        $expun = new UnaryExpression(UnaryOperator.not, $exp1.expun);
 		    }
 		    else
@@ -283,57 +283,55 @@ grammar Smoola;
 		        $expun = new UnaryExpression(UnaryOperator.minus, $exp1.expun);
 		    }
 		}
-	    |	exp2 = expressionMem {$expun = $exp2.expmem ;}
+	    |	exp2 = expressionMem {$expun = $exp2.expmem;}
 	;
 
     expressionMem returns[Expression expmem]:
-		exp1 = expressionMethods exp2 = expressionMemTemp[$exp1.expmeth]{$expmem = $exp2.ex;}
+		instance = expressionMethods access = expressionMemTemp [$instance.expmeth] {$expmem = $access.fullexp;}
 	;
 
-    expressionMemTemp [Expression instance] returns[Expression ex]:
-		'[' exp = expression ']' {$ex = new ArrayCall($instance, $exp.ex);}
-	    |{$ex = $instance;}
+    expressionMemTemp [Expression instance] returns[Expression fullexp]:
+		'[' index = expression ']' {$fullexp = new ArrayCall($instance, $index.expobj);}
+	    |{$fullexp = $instance;}
 	;
 	expressionMethods returns[Expression expmeth]:
-	    exp1 = expressionOther exp2 = expressionMethodsTemp[$exp1.expotherobj]{$expmeth = $exp2.ex;}
+	    instance = expressionOther call = expressionMethodsTemp[$instance.expotherobj]{$expmeth = $call.fullexp;}
 	;
-	expressionMethodsTemp [Expression instance] returns [Expression ex]:
+	expressionMethodsTemp [Expression instance] returns [Expression fullexp]:
 	    {ArrayList args = new ArrayList<Expression>;}
 	    '.'
 	    (
-	    id1=ID '(' ')'
+	    method_name = ID '(' ')'
 	    {
-	        MethodCall nextInstance = new MethodCall($instance, new Identifier(id1.getText()));
+	        Expression next_instance = new MethodCall($instance, new Identifier(method_name.getText()));
 	    }
 	    |
-	    id2=ID '(' (exp = expression{args.add($exp.ex);} (',' exp = expression {args.add($exp.ex);})*) ')'
+	    method_name = ID
 	    {
-	        MethodCall nextInstance = new MethodCall($instance, new Identifier(id2.getText()));
-	        for (int counter = 0; counter < args.size(); counter++) {
-                            nextInstance.addArg(args.get(counter));
-            }
+	        Expression next_instance = new MethodCall($instance, new Identifier(method_name.getText()));
 	    }
+	    '(' (arg = expression{next_instance.addArg($arg.expobj);} (',' arg = expression {next_instance.addArg($arg.expobj);})*) ')'
 	    |
 	    'length'
 	    {
-	        //roo chi call mikone in
+	        Expression next_instance = new Length($instance);
 	    }
 	    )
-	    methodcall = expressionMethodsTemp[nextInstance]{$ex = $methodcall.ex; }
-	    |{$ex = $instance;}
+	    call = expressionMethodsTemp[next_instance]{$fullexp = $call.fullexp; }
+	    |{$fullexp = $instance;}
 	;
     expressionOther returns [Expression expotherobj]:
-		CONST_NUM
-        |	CONST_STR
-        |   'new ' 'int' '[' CONST_NUM ']' {$expotherobj = new NewArray();}
-        |   'new ' instance_name = ID '(' ')' {$expotherobj = new NewClass(new Identifier($instance_name.getText()));}
-        |   'this' {$expotherobj = new This();}
-        |   'true'
-        |   'false'
-        |	identifier = ID {$expotherobj = new Identifier($identifier.getText());}
+		const_int = CONST_NUM { $expotherobj = new IntValue($const_int, IntType());}
+        |	const_string = CONST_STR { $expotherobj = new StingValue($const_string.getText(), StringType());}
+        |   'new ' 'int' '[' size = CONST_NUM ']' { $expotherobj = new NewArray(); $expotherobj.setExpression(new IntValue($size, IntType()));}
+        |   'new ' instance_name = ID '(' ')' { $expotherobj = new NewClass(new Identifier($instance_name.getText()));}
+        |   'this' { $expotherobj = new This();}
+        |   'true' { $expotherobj = new BooleanValue(True, BooleanType());}
+        |   'false' { $expotherobj = new BooleanValue(False, BooleanType());}
+        |	identifier = ID { $expotherobj = new Identifier($identifier.getText());}
         |   array_instance_name = ID '[' array_index = expression ']'
-        {$expotherobj = new ArrayCall(new Identifier($array_instance_name.getText()),$array_index.ex);}
-        |	'(' exp = expression ')' {$expotherobj = $exp.ex;}
+        { $expotherobj = new ArrayCall(new Identifier($array_instance_name.getText()), $array_index.expobj);}
+        |	'(' exp = expression ')' {$expotherobj = $exp.expobj;}
 	;
 	type returns [Type typeobj]:
 	    'int' {$typeobj = new IntType();}
