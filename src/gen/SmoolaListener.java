@@ -1,4 +1,16 @@
 // Generated from /Users/imtore/Desktop/compilerphase2/compilerFall97/Smoola.g4 by ANTLR 4.7
+
+        import ast.node.declaration.*;
+        import ast.node.statement.*;
+        import ast.node.expression.*;
+        import ast.node.expression.Value.*;
+        import ast.Type.ArrayType.*;
+        import ast.Type.PrimitiveType.*;
+        import ast.Type.UserDefinedType.*;
+        import ast.Type.Type;
+        import ast.node.Node;
+        import ast.node.Program;
+    
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**

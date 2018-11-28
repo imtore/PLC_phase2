@@ -1,5 +1,18 @@
 grammar Smoola;
 
+    @header{
+        import ast.node.declaration.*;
+        import ast.node.statement.*;
+        import ast.node.expression.*;
+        import ast.node.expression.Value.*;
+        import ast.Type.ArrayType.*;
+        import ast.Type.PrimitiveType.*;
+        import ast.Type.UserDefinedType.*;
+        import ast.Type.Type;
+        import ast.node.Node;
+        import ast.node.Program;
+    }
+
     @members{
         void print(Object obj){
                 System.out.println(obj);
@@ -25,7 +38,7 @@ grammar Smoola;
         '{'  body = statements 'return' return_value = expression ';' '}' '}'
         {
             for (int counter = 0; counter < $body.stmtlist.size(); counter++) {
-                mainmethod.addStatement($body.stmtlist.get(counter));
+                main_method.addStatement($body.stmtlist.get(counter));
             }
             main_method.setReturnValue($return_value.expobj);
             $mainclassobj = new ClassDeclaration(new Identifier($class_name.getText()),null);
@@ -41,13 +54,13 @@ grammar Smoola;
         (method = methodDeclaration{$classdecobj.addMethodDeclaration($method.methoddecobj);})* '}'
     ;
     varDeclaration returns [VarDeclaration vardecobj]:
-        'var' id = ID ':' vartype = type ';'
+        'var' name = ID ':' vartype = type ';'
         {
-            $vardecobj = new VarDeclaration(Identifier(id.getText()), $vartype.typeobj);
+            $vardecobj = new VarDeclaration(new Identifier($name.getText()), $vartype.typeobj);
         }
     ;
-    methodDeclaration returns [MethodDecalaration methoddecobj]:
-        'def' method_name = ID {$methoddecobj = new methodDeclaration(new Identifier($method_name.getText()));}
+    methodDeclaration returns [MethodDeclaration methoddecobj]:
+        'def' method_name = ID {$methoddecobj = new MethodDeclaration(new Identifier($method_name.getText()));}
         ('(' ')'
         |
         (
@@ -61,7 +74,7 @@ grammar Smoola;
         })*
         ')')) ':' return_type = type
         {
-            $methoddecobj.setReturnType($return_type.typeobj)
+            $methoddecobj.setReturnType($return_type.typeobj);
         }
         '{' (localvar = varDeclaration
         {
@@ -130,7 +143,7 @@ grammar Smoola;
 		exp = expressionAssignment
 		{
 		    $expobj = $exp.expasgn;
-		    $isAssignStatement = !$exp.isAssignExp
+		    $isAssignStatement = !$exp.isAssignExp;
 		}
 	;
 
@@ -184,15 +197,19 @@ grammar Smoola;
 	;
 
     expressionEqTemp [Expression leftside] returns [Expression fullexp]:
-		(op = '==' | op = '<>') expright = expressionCmp
+        {
+            Boolean eq;
+            Expression leftmostexp;
+        }
+		('==' {eq = True;}| '<>' {eq = False;}) expright = expressionCmp
 		{
-		    if($op == '==')
+		    if(eq)
 		    {
-		        Expression leftmostexp = new BinaryExpression($leftside, $expright.expcmp, BinaryOperator.eq);
+		        leftmostexp = new BinaryExpression($leftside, $expright.expcmp, BinaryOperator.eq);
 		    }
 		    else
 		    {
-		        Expression leftmostexp = new BinaryExpression($leftside, $expright.expcmp, BinaryOperator.neq);
+		        leftmostexp = new BinaryExpression($leftside, $expright.expcmp, BinaryOperator.neq);
 		    }
 
 		}
@@ -208,15 +225,18 @@ grammar Smoola;
 	;
 
     expressionCmpTemp [Expression leftside] returns [Expression fullexp]:
+        {
+            Expression leftmostexp;
+        }
 		(op = '<' | op = '>') expright = expressionAdd
 		{
 		    if($op == '<')
             {
-                Expression leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.lt);
+                leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.lt);
             }
             else
             {
-                Expression leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.gt);
+                leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.gt);
             }
 		}
 		exp = expressionCmpTemp[leftmostexp]
@@ -231,15 +251,18 @@ grammar Smoola;
 	;
 
     expressionAddTemp [Expression leftside] returns [Expression fullexp]:
+        {
+            Expression leftmostexp;
+        }
 		(op = '+' | op = '-') expright = expressionMult
 		{
 		    if($op == '+')
             {
-                Expression leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.add);
+                leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.add);
             }
             else
             {
-                Expression leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.sub);
+                leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.sub);
             }
 		}
 		exp = expressionAddTemp[leftmostexp]
@@ -254,16 +277,19 @@ grammar Smoola;
 	;
 
     expressionMultTemp[Expression leftside] returns [Expression fullexp]:
+        {
+            Expression leftmostexp;
+        }
 		(op = '*' | op = '/') expright = expressionUnary
 		{
 		    if($op == '*')
-                {
-                    Expression leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.mult);
-                }
-                else
-                {
-                    Expression leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.div);
-                }
+            {
+                leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.mult);
+            }
+            else
+            {
+                leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.div);
+            }
 		}
 		exp = expressionMultTemp[leftmostexp]
 		{
@@ -298,36 +324,38 @@ grammar Smoola;
 	    instance = expressionOther call = expressionMethodsTemp[$instance.expotherobj]{$expmeth = $call.fullexp;}
 	;
 	expressionMethodsTemp [Expression instance] returns [Expression fullexp]:
-	    {ArrayList args = new ArrayList<Expression>;}
+	    {
+	        Expression next_instance;
+	    }
 	    '.'
 	    (
 	    method_name = ID '(' ')'
 	    {
-	        Expression next_instance = new MethodCall($instance, new Identifier(method_name.getText()));
+	        next_instance = new MethodCall($instance, new Identifier($method_name.getText()));
 	    }
 	    |
 	    method_name = ID
 	    {
-	        Expression next_instance = new MethodCall($instance, new Identifier(method_name.getText()));
+	        next_instance = new MethodCall($instance, new Identifier($method_name.getText()));
 	    }
 	    '(' (arg = expression{next_instance.addArg($arg.expobj);} (',' arg = expression {next_instance.addArg($arg.expobj);})*) ')'
 	    |
 	    'length'
 	    {
-	        Expression next_instance = new Length($instance);
+	        next_instance = new Length($instance);
 	    }
 	    )
 	    call = expressionMethodsTemp[next_instance]{$fullexp = $call.fullexp; }
 	    |{$fullexp = $instance;}
 	;
     expressionOther returns [Expression expotherobj]:
-		const_int = CONST_NUM { $expotherobj = new IntValue($const_int, IntType());}
-        |	const_string = CONST_STR { $expotherobj = new StingValue($const_string.getText(), StringType());}
-        |   'new ' 'int' '[' size = CONST_NUM ']' { $expotherobj = new NewArray(); $expotherobj.setExpression(new IntValue($size, IntType()));}
+		const_int = CONST_NUM { $expotherobj = new IntValue($const_int, new IntType());}
+        |	const_string = CONST_STR { $expotherobj = new StringValue($const_string.getText(), new StringType());}
+        |   'new ' 'int' '[' size = CONST_NUM ']' { $expotherobj = new NewArray(); $expotherobj.setExpression(new IntValue($size,new IntType()));}
         |   'new ' instance_name = ID '(' ')' { $expotherobj = new NewClass(new Identifier($instance_name.getText()));}
         |   'this' { $expotherobj = new This();}
-        |   'true' { $expotherobj = new BooleanValue(True, BooleanType());}
-        |   'false' { $expotherobj = new BooleanValue(False, BooleanType());}
+        |   'true' { $expotherobj = new BooleanValue(true, new BooleanType());}
+        |   'false' { $expotherobj = new BooleanValue(false, new BooleanType());}
         |	identifier = ID { $expotherobj = new Identifier($identifier.getText());}
         |   array_instance_name = ID '[' array_index = expression ']'
         { $expotherobj = new ArrayCall(new Identifier($array_instance_name.getText()), $array_index.expobj);}
@@ -340,8 +368,8 @@ grammar Smoola;
 	    |   'int' '[' ']'  {$typeobj = new ArrayType();}
 	    |   id = ID
 	    {
-	        $typeobj = new UserdefinedType();
-	        $typeobj.setName(Identifier(id.getText()));
+	        $typeobj = new UserDefinedType();
+	        $typeobj.setName(new Identifier($id.getText()));
 	    }
 	;
     CONST_NUM:
