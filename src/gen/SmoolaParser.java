@@ -275,8 +275,11 @@ public class SmoolaParser extends Parser {
 			                main_method.addStatement(((MainClassContext)_localctx).body.stmtlist.get(counter));
 			            }
 			            main_method.setReturnValue(((MainClassContext)_localctx).return_value.expobj);
-			            ((MainClassContext)_localctx).mainclassobj =  new ClassDeclaration(new Identifier(((MainClassContext)_localctx).class_name.getText()),null);
+			            ((MainClassContext)_localctx).mainclassobj =  new ClassDeclaration(new Identifier(((MainClassContext)_localctx).class_name.getText()),new Identifier(""));
+			            print("here6");
 			            _localctx.mainclassobj.addMethodDeclaration(main_method);
+			            print("here7");
+
 			        
 			}
 		}
@@ -354,6 +357,7 @@ public class SmoolaParser extends Parser {
 			match(T__1);
 
 			            ((ClassDeclarationContext)_localctx).classdecobj =  new ClassDeclaration(new Identifier(((ClassDeclarationContext)_localctx).class_name.getText()), new Identifier(((ClassDeclarationContext)_localctx).parent_name.getText()));
+			            print("here2");
 			        
 			setState(111);
 			_errHandler.sync(this);
@@ -1051,11 +1055,11 @@ public class SmoolaParser extends Parser {
 			match(T__8);
 
 			            if(((StatementAssignmentContext)_localctx).exp.isAssignStatement){
-			                ((StatementAssignmentContext)_localctx).asgnobj =  new Assign(((StatementAssignmentContext)_localctx).exp.expobj.getLeft(), ((StatementAssignmentContext)_localctx).exp.expobj.getRight());
+			                ((StatementAssignmentContext)_localctx).asgnobj =  new Assign(((BinaryExpression)((StatementAssignmentContext)_localctx).exp.expobj).getLeft(), ((BinaryExpression)((StatementAssignmentContext)_localctx).exp.expobj).getRight());
 			            }
 			            else
 			            {
-			                ((StatementAssignmentContext)_localctx).asgnobj =  new Assign(null, ((StatementAssignmentContext)_localctx).exp.expobj.getRight());
+			                ((StatementAssignmentContext)_localctx).asgnobj =  new Assign(null, ((BinaryExpression)((StatementAssignmentContext)_localctx).exp.expobj).getRight());
 			            }
 			        
 			}
@@ -1161,7 +1165,7 @@ public class SmoolaParser extends Parser {
 				((ExpressionAssignmentContext)_localctx).expright = expressionAssignment();
 
 						    ((ExpressionAssignmentContext)_localctx).expasgn =  new BinaryExpression(((ExpressionAssignmentContext)_localctx).expleft.expor, ((ExpressionAssignmentContext)_localctx).expright.expasgn, BinaryOperator.assign);
-						    ((ExpressionAssignmentContext)_localctx).isAssignExp =  True;
+						    ((ExpressionAssignmentContext)_localctx).isAssignExp =  true;
 						
 				}
 				break;
@@ -1172,7 +1176,7 @@ public class SmoolaParser extends Parser {
 				((ExpressionAssignmentContext)_localctx).exp = expressionOr();
 
 					        ((ExpressionAssignmentContext)_localctx).expasgn =  ((ExpressionAssignmentContext)_localctx).exp.expor;
-					        ((ExpressionAssignmentContext)_localctx).isAssignExp =  False;
+					        ((ExpressionAssignmentContext)_localctx).isAssignExp =  false;
 					    
 				}
 				break;
@@ -1535,14 +1539,14 @@ public class SmoolaParser extends Parser {
 					{
 					setState(280);
 					match(T__21);
-					eq = True;
+					eq = true;
 					}
 					break;
 				case T__22:
 					{
 					setState(282);
 					match(T__22);
-					eq = False;
+					eq = false;
 					}
 					break;
 				default:
@@ -1646,7 +1650,6 @@ public class SmoolaParser extends Parser {
 	public static class ExpressionCmpTempContext extends ParserRuleContext {
 		public Expression leftside;
 		public Expression fullexp;
-		public Token op;
 		public ExpressionAddContext expright;
 		public ExpressionCmpTempContext exp;
 		public ExpressionAddContext expressionAdd() {
@@ -1675,7 +1678,7 @@ public class SmoolaParser extends Parser {
 		ExpressionCmpTempContext _localctx = new ExpressionCmpTempContext(_ctx, getState(), leftside);
 		enterRule(_localctx, 42, RULE_expressionCmpTemp);
 		try {
-			setState(309);
+			setState(311);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__23:
@@ -1684,29 +1687,32 @@ public class SmoolaParser extends Parser {
 				{
 
 				            Expression leftmostexp;
+				            Boolean lt;
 				        
-				setState(301);
+				setState(303);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case T__23:
 					{
 					setState(299);
-					((ExpressionCmpTempContext)_localctx).op = match(T__23);
+					match(T__23);
+					lt = true;
 					}
 					break;
 				case T__24:
 					{
-					setState(300);
-					((ExpressionCmpTempContext)_localctx).op = match(T__24);
+					setState(301);
+					match(T__24);
+					lt = false;
 					}
 					break;
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(303);
+				setState(305);
 				((ExpressionCmpTempContext)_localctx).expright = expressionAdd();
 
-						    if(((ExpressionCmpTempContext)_localctx).op == '<')
+						    if(lt)
 				            {
 				                leftmostexp = new BinaryExpression(_localctx.leftside, ((ExpressionCmpTempContext)_localctx).expright.expadd, BinaryOperator.lt);
 				            }
@@ -1715,7 +1721,7 @@ public class SmoolaParser extends Parser {
 				                leftmostexp = new BinaryExpression(_localctx.leftside, ((ExpressionCmpTempContext)_localctx).expright.expadd, BinaryOperator.gt);
 				            }
 						
-				setState(305);
+				setState(307);
 				((ExpressionCmpTempContext)_localctx).exp = expressionCmpTemp(leftmostexp);
 
 				            ((ExpressionCmpTempContext)_localctx).fullexp =  ((ExpressionCmpTempContext)_localctx).exp.fullexp;
@@ -1781,9 +1787,9 @@ public class SmoolaParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(311);
+			setState(313);
 			((ExpressionAddContext)_localctx).expleft = expressionMult();
-			setState(312);
+			setState(314);
 			((ExpressionAddContext)_localctx).rest = expressionAddTemp(((ExpressionAddContext)_localctx).expleft.expmult);
 			((ExpressionAddContext)_localctx).expadd =  ((ExpressionAddContext)_localctx).rest.fullexp;
 			}
@@ -1802,7 +1808,6 @@ public class SmoolaParser extends Parser {
 	public static class ExpressionAddTempContext extends ParserRuleContext {
 		public Expression leftside;
 		public Expression fullexp;
-		public Token op;
 		public ExpressionMultContext expright;
 		public ExpressionAddTempContext exp;
 		public ExpressionMultContext expressionMult() {
@@ -1831,7 +1836,7 @@ public class SmoolaParser extends Parser {
 		ExpressionAddTempContext _localctx = new ExpressionAddTempContext(_ctx, getState(), leftside);
 		enterRule(_localctx, 46, RULE_expressionAddTemp);
 		try {
-			setState(326);
+			setState(330);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__25:
@@ -1840,29 +1845,32 @@ public class SmoolaParser extends Parser {
 				{
 
 				            Expression leftmostexp;
+				            Boolean add;
 				        
-				setState(318);
+				setState(322);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case T__25:
 					{
-					setState(316);
-					((ExpressionAddTempContext)_localctx).op = match(T__25);
+					setState(318);
+					match(T__25);
+					add = true;
 					}
 					break;
 				case T__26:
 					{
-					setState(317);
-					((ExpressionAddTempContext)_localctx).op = match(T__26);
+					setState(320);
+					match(T__26);
+					add = false;
 					}
 					break;
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(320);
+				setState(324);
 				((ExpressionAddTempContext)_localctx).expright = expressionMult();
 
-						    if(((ExpressionAddTempContext)_localctx).op == '+')
+						    if(add)
 				            {
 				                leftmostexp = new BinaryExpression(_localctx.leftside, ((ExpressionAddTempContext)_localctx).expright.expmult, BinaryOperator.add);
 				            }
@@ -1871,7 +1879,7 @@ public class SmoolaParser extends Parser {
 				                leftmostexp = new BinaryExpression(_localctx.leftside, ((ExpressionAddTempContext)_localctx).expright.expmult, BinaryOperator.sub);
 				            }
 						
-				setState(322);
+				setState(326);
 				((ExpressionAddTempContext)_localctx).exp = expressionAddTemp(leftmostexp);
 
 						    ((ExpressionAddTempContext)_localctx).fullexp =  ((ExpressionAddTempContext)_localctx).exp.fullexp;
@@ -1939,9 +1947,9 @@ public class SmoolaParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(328);
+			setState(332);
 			((ExpressionMultContext)_localctx).expleft = expressionUnary();
-			setState(329);
+			setState(333);
 			((ExpressionMultContext)_localctx).rest = expressionMultTemp(((ExpressionMultContext)_localctx).expleft.expun);
 			((ExpressionMultContext)_localctx).expmult =  ((ExpressionMultContext)_localctx).rest.fullexp;
 			}
@@ -1960,7 +1968,6 @@ public class SmoolaParser extends Parser {
 	public static class ExpressionMultTempContext extends ParserRuleContext {
 		public Expression leftside;
 		public Expression fullexp;
-		public Token op;
 		public ExpressionUnaryContext expright;
 		public ExpressionMultTempContext exp;
 		public ExpressionUnaryContext expressionUnary() {
@@ -1989,7 +1996,7 @@ public class SmoolaParser extends Parser {
 		ExpressionMultTempContext _localctx = new ExpressionMultTempContext(_ctx, getState(), leftside);
 		enterRule(_localctx, 50, RULE_expressionMultTemp);
 		try {
-			setState(343);
+			setState(349);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__27:
@@ -1998,29 +2005,32 @@ public class SmoolaParser extends Parser {
 				{
 
 				            Expression leftmostexp;
+				            Boolean mult;
 				        
-				setState(335);
+				setState(341);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case T__27:
 					{
-					setState(333);
-					((ExpressionMultTempContext)_localctx).op = match(T__27);
+					setState(337);
+					match(T__27);
+					mult = true;
 					}
 					break;
 				case T__28:
 					{
-					setState(334);
-					((ExpressionMultTempContext)_localctx).op = match(T__28);
+					setState(339);
+					match(T__28);
+					mult = false;
 					}
 					break;
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(337);
+				setState(343);
 				((ExpressionMultTempContext)_localctx).expright = expressionUnary();
 
-						    if(((ExpressionMultTempContext)_localctx).op == '*')
+						    if(mult)
 				            {
 				                leftmostexp = new BinaryExpression(_localctx.leftside, ((ExpressionMultTempContext)_localctx).expright.expun, BinaryOperator.mult);
 				            }
@@ -2029,7 +2039,7 @@ public class SmoolaParser extends Parser {
 				                leftmostexp = new BinaryExpression(_localctx.leftside, ((ExpressionMultTempContext)_localctx).expright.expun, BinaryOperator.div);
 				            }
 						
-				setState(339);
+				setState(345);
 				((ExpressionMultTempContext)_localctx).exp = expressionMultTemp(leftmostexp);
 
 						    ((ExpressionMultTempContext)_localctx).fullexp =  ((ExpressionMultTempContext)_localctx).exp.fullexp;
@@ -2071,7 +2081,6 @@ public class SmoolaParser extends Parser {
 
 	public static class ExpressionUnaryContext extends ParserRuleContext {
 		public Expression expun;
-		public Token op;
 		public ExpressionUnaryContext exp1;
 		public ExpressionMemContext exp2;
 		public ExpressionUnaryContext expressionUnary() {
@@ -2098,35 +2107,40 @@ public class SmoolaParser extends Parser {
 		ExpressionUnaryContext _localctx = new ExpressionUnaryContext(_ctx, getState());
 		enterRule(_localctx, 52, RULE_expressionUnary);
 		try {
-			setState(355);
+			setState(364);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__26:
 			case T__29:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(347);
+
+				            Boolean not;
+				        
+				setState(356);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case T__29:
 					{
-					setState(345);
-					((ExpressionUnaryContext)_localctx).op = match(T__29);
+					setState(352);
+					match(T__29);
+					not = true;
 					}
 					break;
 				case T__26:
 					{
-					setState(346);
-					((ExpressionUnaryContext)_localctx).op = match(T__26);
+					setState(354);
+					match(T__26);
+					not = false;
 					}
 					break;
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(349);
+				setState(358);
 				((ExpressionUnaryContext)_localctx).exp1 = expressionUnary();
 
-						    if(op == '!'){
+						    if(not){
 						        ((ExpressionUnaryContext)_localctx).expun =  new UnaryExpression(UnaryOperator.not, ((ExpressionUnaryContext)_localctx).exp1.expun);
 						    }
 						    else
@@ -2146,7 +2160,7 @@ public class SmoolaParser extends Parser {
 			case ID:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(352);
+				setState(361);
 				((ExpressionUnaryContext)_localctx).exp2 = expressionMem();
 				((ExpressionUnaryContext)_localctx).expun =  ((ExpressionUnaryContext)_localctx).exp2.expmem;
 				}
@@ -2196,9 +2210,9 @@ public class SmoolaParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(357);
+			setState(366);
 			((ExpressionMemContext)_localctx).instance = expressionMethods();
-			setState(358);
+			setState(367);
 			((ExpressionMemContext)_localctx).access = expressionMemTemp(((ExpressionMemContext)_localctx).instance.expmeth);
 			((ExpressionMemContext)_localctx).expmem =  ((ExpressionMemContext)_localctx).access.fullexp;
 			}
@@ -2241,17 +2255,17 @@ public class SmoolaParser extends Parser {
 		ExpressionMemTempContext _localctx = new ExpressionMemTempContext(_ctx, getState(), instance);
 		enterRule(_localctx, 56, RULE_expressionMemTemp);
 		try {
-			setState(367);
+			setState(376);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__30:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(361);
+				setState(370);
 				match(T__30);
-				setState(362);
+				setState(371);
 				((ExpressionMemTempContext)_localctx).index = expression();
-				setState(363);
+				setState(372);
 				match(T__31);
 				((ExpressionMemTempContext)_localctx).fullexp =  new ArrayCall(_localctx.instance, ((ExpressionMemTempContext)_localctx).index.expobj);
 				}
@@ -2321,9 +2335,9 @@ public class SmoolaParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(369);
+			setState(378);
 			((ExpressionMethodsContext)_localctx).instance = expressionOther();
-			setState(370);
+			setState(379);
 			((ExpressionMethodsContext)_localctx).call = expressionMethodsTemp(((ExpressionMethodsContext)_localctx).instance.expotherobj);
 			((ExpressionMethodsContext)_localctx).expmeth =  ((ExpressionMethodsContext)_localctx).call.fullexp;
 			}
@@ -2343,6 +2357,7 @@ public class SmoolaParser extends Parser {
 		public Expression instance;
 		public Expression fullexp;
 		public Token method_name;
+		public ExpressionContext first_arg;
 		public ExpressionContext arg;
 		public ExpressionMethodsTempContext call;
 		public ExpressionMethodsTempContext expressionMethodsTemp() {
@@ -2376,71 +2391,71 @@ public class SmoolaParser extends Parser {
 		enterRule(_localctx, 60, RULE_expressionMethodsTemp);
 		int _la;
 		try {
-			setState(403);
+			setState(412);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__32:
 				enterOuterAlt(_localctx, 1);
 				{
 
-					        Expression next_instance;
+					        Expression next_instance = null;
 					    
-				setState(374);
+				setState(383);
 				match(T__32);
-				setState(397);
+				setState(406);
 				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,25,_ctx) ) {
 				case 1:
 					{
-					setState(375);
+					setState(384);
 					((ExpressionMethodsTempContext)_localctx).method_name = match(ID);
-					setState(376);
-					match(T__3);
-					setState(377);
-					match(T__4);
 
-						        next_instance = new MethodCall(_localctx.instance, new Identifier(((ExpressionMethodsTempContext)_localctx).method_name.getText()));
-						    
+					            next_instance = new MethodCall(_localctx.instance, new Identifier(((ExpressionMethodsTempContext)_localctx).method_name.getText()));
+					        
+					setState(386);
+					match(T__3);
+					setState(387);
+					match(T__4);
 					}
 					break;
 				case 2:
 					{
-					setState(379);
+					setState(388);
 					((ExpressionMethodsTempContext)_localctx).method_name = match(ID);
 
 						        next_instance = new MethodCall(_localctx.instance, new Identifier(((ExpressionMethodsTempContext)_localctx).method_name.getText()));
 						    
-					setState(381);
+					setState(390);
 					match(T__3);
 					{
-					setState(382);
-					((ExpressionMethodsTempContext)_localctx).arg = expression();
-					next_instance.addArg(((ExpressionMethodsTempContext)_localctx).arg.expobj);
-					setState(390);
+					setState(391);
+					((ExpressionMethodsTempContext)_localctx).first_arg = expression();
+					((MethodCall)next_instance).addArg(((ExpressionMethodsTempContext)_localctx).first_arg.expobj);
+					setState(399);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 					while (_la==T__12) {
 						{
 						{
-						setState(384);
+						setState(393);
 						match(T__12);
-						setState(385);
+						setState(394);
 						((ExpressionMethodsTempContext)_localctx).arg = expression();
-						next_instance.addArg(((ExpressionMethodsTempContext)_localctx).arg.expobj);
+						((MethodCall)next_instance).addArg(((ExpressionMethodsTempContext)_localctx).arg.expobj);
 						}
 						}
-						setState(392);
+						setState(401);
 						_errHandler.sync(this);
 						_la = _input.LA(1);
 					}
 					}
-					setState(393);
+					setState(402);
 					match(T__4);
 					}
 					break;
 				case 3:
 					{
-					setState(395);
+					setState(404);
 					match(T__33);
 
 						        next_instance = new Length(_localctx.instance);
@@ -2448,7 +2463,7 @@ public class SmoolaParser extends Parser {
 					}
 					break;
 				}
-				setState(399);
+				setState(408);
 				((ExpressionMethodsTempContext)_localctx).call = expressionMethodsTemp(next_instance);
 				((ExpressionMethodsTempContext)_localctx).fullexp =  ((ExpressionMethodsTempContext)_localctx).call.fullexp; 
 				}
@@ -2523,21 +2538,21 @@ public class SmoolaParser extends Parser {
 		ExpressionOtherContext _localctx = new ExpressionOtherContext(_ctx, getState());
 		enterRule(_localctx, 62, RULE_expressionOther);
 		try {
-			setState(439);
+			setState(448);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(405);
+				setState(414);
 				((ExpressionOtherContext)_localctx).const_int = match(CONST_NUM);
-				 ((ExpressionOtherContext)_localctx).expotherobj =  new IntValue(((ExpressionOtherContext)_localctx).const_int, new IntType());
+				 ((ExpressionOtherContext)_localctx).expotherobj =  new IntValue(Integer.parseInt(((ExpressionOtherContext)_localctx).const_int.getText()), new IntType());
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(407);
+				setState(416);
 				((ExpressionOtherContext)_localctx).const_string = match(CONST_STR);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new StringValue(((ExpressionOtherContext)_localctx).const_string.getText(), new StringType());
 				}
@@ -2545,29 +2560,29 @@ public class SmoolaParser extends Parser {
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(409);
+				setState(418);
 				match(T__34);
-				setState(410);
+				setState(419);
 				match(T__6);
-				setState(411);
+				setState(420);
 				match(T__30);
-				setState(412);
+				setState(421);
 				((ExpressionOtherContext)_localctx).size = match(CONST_NUM);
-				setState(413);
+				setState(422);
 				match(T__31);
-				 ((ExpressionOtherContext)_localctx).expotherobj =  new NewArray(); _localctx.expotherobj.setExpression(new IntValue(((ExpressionOtherContext)_localctx).size,new IntType()));
+				 ((ExpressionOtherContext)_localctx).expotherobj =  new NewArray(); ((NewArray)_localctx.expotherobj).setExpression(new IntValue(Integer.parseInt(((ExpressionOtherContext)_localctx).size.getText()),new IntType()));
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(415);
+				setState(424);
 				match(T__34);
-				setState(416);
+				setState(425);
 				((ExpressionOtherContext)_localctx).instance_name = match(ID);
-				setState(417);
+				setState(426);
 				match(T__3);
-				setState(418);
+				setState(427);
 				match(T__4);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new NewClass(new Identifier(((ExpressionOtherContext)_localctx).instance_name.getText()));
 				}
@@ -2575,7 +2590,7 @@ public class SmoolaParser extends Parser {
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(420);
+				setState(429);
 				match(T__35);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new This();
 				}
@@ -2583,7 +2598,7 @@ public class SmoolaParser extends Parser {
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(422);
+				setState(431);
 				match(T__36);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new BooleanValue(true, new BooleanType());
 				}
@@ -2591,7 +2606,7 @@ public class SmoolaParser extends Parser {
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(424);
+				setState(433);
 				match(T__37);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new BooleanValue(false, new BooleanType());
 				}
@@ -2599,7 +2614,7 @@ public class SmoolaParser extends Parser {
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
-				setState(426);
+				setState(435);
 				((ExpressionOtherContext)_localctx).identifier = match(ID);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new Identifier(((ExpressionOtherContext)_localctx).identifier.getText());
 				}
@@ -2607,13 +2622,13 @@ public class SmoolaParser extends Parser {
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(428);
+				setState(437);
 				((ExpressionOtherContext)_localctx).array_instance_name = match(ID);
-				setState(429);
+				setState(438);
 				match(T__30);
-				setState(430);
+				setState(439);
 				((ExpressionOtherContext)_localctx).array_index = expression();
-				setState(431);
+				setState(440);
 				match(T__31);
 				 ((ExpressionOtherContext)_localctx).expotherobj =  new ArrayCall(new Identifier(((ExpressionOtherContext)_localctx).array_instance_name.getText()), ((ExpressionOtherContext)_localctx).array_index.expobj);
 				}
@@ -2621,11 +2636,11 @@ public class SmoolaParser extends Parser {
 			case 10:
 				enterOuterAlt(_localctx, 10);
 				{
-				setState(434);
+				setState(443);
 				match(T__3);
-				setState(435);
+				setState(444);
 				((ExpressionOtherContext)_localctx).exp = expression();
-				setState(436);
+				setState(445);
 				match(T__4);
 				((ExpressionOtherContext)_localctx).expotherobj =  ((ExpressionOtherContext)_localctx).exp.expobj;
 				}
@@ -2665,13 +2680,13 @@ public class SmoolaParser extends Parser {
 		TypeContext _localctx = new TypeContext(_ctx, getState());
 		enterRule(_localctx, 64, RULE_type);
 		try {
-			setState(453);
+			setState(462);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,28,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(441);
+				setState(450);
 				match(T__6);
 				((TypeContext)_localctx).typeobj =  new IntType();
 				}
@@ -2679,7 +2694,7 @@ public class SmoolaParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(443);
+				setState(452);
 				match(T__38);
 				((TypeContext)_localctx).typeobj =  new BooleanType();
 				}
@@ -2687,7 +2702,7 @@ public class SmoolaParser extends Parser {
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(445);
+				setState(454);
 				match(T__39);
 				((TypeContext)_localctx).typeobj =  new StringType();
 				}
@@ -2695,11 +2710,11 @@ public class SmoolaParser extends Parser {
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(447);
+				setState(456);
 				match(T__6);
-				setState(448);
+				setState(457);
 				match(T__30);
-				setState(449);
+				setState(458);
 				match(T__31);
 				((TypeContext)_localctx).typeobj =  new ArrayType();
 				}
@@ -2707,11 +2722,11 @@ public class SmoolaParser extends Parser {
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(451);
+				setState(460);
 				((TypeContext)_localctx).id = match(ID);
 
 					        ((TypeContext)_localctx).typeobj =  new UserDefinedType();
-					        _localctx.typeobj.setName(new Identifier(((TypeContext)_localctx).id.getText()));
+					        ((UserDefinedType)_localctx.typeobj).setName(new Identifier(((TypeContext)_localctx).id.getText()));
 					    
 				}
 				break;
@@ -2729,7 +2744,7 @@ public class SmoolaParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\60\u01ca\4\2\t\2"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\60\u01d3\4\2\t\2"+
 		"\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
 		"\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -2750,140 +2765,143 @@ public class SmoolaParser extends Parser {
 		"\3\22\3\22\3\22\3\22\3\23\3\23\3\23\3\23\3\23\3\23\3\23\5\23\u0114\n\23"+
 		"\3\24\3\24\3\24\3\24\3\25\3\25\3\25\3\25\3\25\5\25\u011f\n\25\3\25\3\25"+
 		"\3\25\3\25\3\25\3\25\5\25\u0127\n\25\3\26\3\26\3\26\3\26\3\27\3\27\3\27"+
-		"\5\27\u0130\n\27\3\27\3\27\3\27\3\27\3\27\3\27\5\27\u0138\n\27\3\30\3"+
-		"\30\3\30\3\30\3\31\3\31\3\31\5\31\u0141\n\31\3\31\3\31\3\31\3\31\3\31"+
-		"\3\31\5\31\u0149\n\31\3\32\3\32\3\32\3\32\3\33\3\33\3\33\5\33\u0152\n"+
-		"\33\3\33\3\33\3\33\3\33\3\33\3\33\5\33\u015a\n\33\3\34\3\34\5\34\u015e"+
-		"\n\34\3\34\3\34\3\34\3\34\3\34\3\34\5\34\u0166\n\34\3\35\3\35\3\35\3\35"+
-		"\3\36\3\36\3\36\3\36\3\36\3\36\5\36\u0172\n\36\3\37\3\37\3\37\3\37\3 "+
-		"\3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \7 \u0187\n \f \16 \u018a\13"+
-		" \3 \3 \3 \3 \5 \u0190\n \3 \3 \3 \3 \5 \u0196\n \3!\3!\3!\3!\3!\3!\3"+
-		"!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3"+
-		"!\3!\3!\3!\3!\5!\u01ba\n!\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\""+
-		"\3\"\5\"\u01c8\n\"\3\"\2\2#\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \""+
-		"$&(*,.\60\62\64\668:<>@B\2\2\2\u01d4\2D\3\2\2\2\4Q\3\2\2\2\6d\3\2\2\2"+
-		"\b~\3\2\2\2\n\u0085\3\2\2\2\f\u00b1\3\2\2\2\16\u00c9\3\2\2\2\20\u00cb"+
-		"\3\2\2\2\22\u00d0\3\2\2\2\24\u00dd\3\2\2\2\26\u00e4\3\2\2\2\30\u00ea\3"+
-		"\2\2\2\32\u00ee\3\2\2\2\34\u00f9\3\2\2\2\36\u00fb\3\2\2\2 \u0106\3\2\2"+
-		"\2\"\u0108\3\2\2\2$\u0113\3\2\2\2&\u0115\3\2\2\2(\u0126\3\2\2\2*\u0128"+
-		"\3\2\2\2,\u0137\3\2\2\2.\u0139\3\2\2\2\60\u0148\3\2\2\2\62\u014a\3\2\2"+
-		"\2\64\u0159\3\2\2\2\66\u0165\3\2\2\28\u0167\3\2\2\2:\u0171\3\2\2\2<\u0173"+
-		"\3\2\2\2>\u0195\3\2\2\2@\u01b9\3\2\2\2B\u01c7\3\2\2\2DE\b\2\1\2EK\5\4"+
-		"\3\2FG\5\6\4\2GH\b\2\1\2HJ\3\2\2\2IF\3\2\2\2JM\3\2\2\2KI\3\2\2\2KL\3\2"+
-		"\2\2LN\3\2\2\2MK\3\2\2\2NO\7\2\2\3OP\b\2\1\2P\3\3\2\2\2QR\7\3\2\2RS\7"+
-		".\2\2ST\7\4\2\2TU\7\5\2\2UV\7.\2\2VW\7\6\2\2WX\7\7\2\2XY\7\b\2\2YZ\7\t"+
-		"\2\2Z[\b\3\1\2[\\\7\4\2\2\\]\5\f\7\2]^\7\n\2\2^_\5\32\16\2_`\7\13\2\2"+
-		"`a\7\f\2\2ab\7\f\2\2bc\b\3\1\2c\5\3\2\2\2de\7\3\2\2eh\7.\2\2fg\7\r\2\2"+
-		"gi\7.\2\2hf\3\2\2\2hi\3\2\2\2ij\3\2\2\2jk\7\4\2\2kq\b\4\1\2lm\5\b\5\2"+
-		"mn\b\4\1\2np\3\2\2\2ol\3\2\2\2ps\3\2\2\2qo\3\2\2\2qr\3\2\2\2ry\3\2\2\2"+
-		"sq\3\2\2\2tu\5\n\6\2uv\b\4\1\2vx\3\2\2\2wt\3\2\2\2x{\3\2\2\2yw\3\2\2\2"+
-		"yz\3\2\2\2z|\3\2\2\2{y\3\2\2\2|}\7\f\2\2}\7\3\2\2\2~\177\7\16\2\2\177"+
-		"\u0080\7.\2\2\u0080\u0081\7\b\2\2\u0081\u0082\5B\"\2\u0082\u0083\7\13"+
-		"\2\2\u0083\u0084\b\5\1\2\u0084\t\3\2\2\2\u0085\u0086\7\5\2\2\u0086\u0087"+
-		"\7.\2\2\u0087\u009c\b\6\1\2\u0088\u0089\7\6\2\2\u0089\u009d\7\7\2\2\u008a"+
-		"\u008b\7\6\2\2\u008b\u008c\7.\2\2\u008c\u008d\7\b\2\2\u008d\u008e\5B\""+
-		"\2\u008e\u0097\b\6\1\2\u008f\u0090\7\17\2\2\u0090\u0091\7.\2\2\u0091\u0092"+
-		"\7\b\2\2\u0092\u0093\5B\"\2\u0093\u0094\b\6\1\2\u0094\u0096\3\2\2\2\u0095"+
-		"\u008f\3\2\2\2\u0096\u0099\3\2\2\2\u0097\u0095\3\2\2\2\u0097\u0098\3\2"+
-		"\2\2\u0098\u009a\3\2\2\2\u0099\u0097\3\2\2\2\u009a\u009b\7\7\2\2\u009b"+
-		"\u009d\3\2\2\2\u009c\u0088\3\2\2\2\u009c\u008a\3\2\2\2\u009d\u009e\3\2"+
-		"\2\2\u009e\u009f\7\b\2\2\u009f\u00a0\5B\"\2\u00a0\u00a1\b\6\1\2\u00a1"+
-		"\u00a7\7\4\2\2\u00a2\u00a3\5\b\5\2\u00a3\u00a4\b\6\1\2\u00a4\u00a6\3\2"+
-		"\2\2\u00a5\u00a2\3\2\2\2\u00a6\u00a9\3\2\2\2\u00a7\u00a5\3\2\2\2\u00a7"+
-		"\u00a8\3\2\2\2\u00a8\u00aa\3\2\2\2\u00a9\u00a7\3\2\2\2\u00aa\u00ab\5\f"+
-		"\7\2\u00ab\u00ac\7\n\2\2\u00ac\u00ad\5\32\16\2\u00ad\u00ae\7\13\2\2\u00ae"+
-		"\u00af\7\f\2\2\u00af\u00b0\b\6\1\2\u00b0\13\3\2\2\2\u00b1\u00b7\b\7\1"+
-		"\2\u00b2\u00b3\5\16\b\2\u00b3\u00b4\b\7\1\2\u00b4\u00b6\3\2\2\2\u00b5"+
-		"\u00b2\3\2\2\2\u00b6\u00b9\3\2\2\2\u00b7\u00b5\3\2\2\2\u00b7\u00b8\3\2"+
-		"\2\2\u00b8\r\3\2\2\2\u00b9\u00b7\3\2\2\2\u00ba\u00bb\5\20\t\2\u00bb\u00bc"+
-		"\b\b\1\2\u00bc\u00ca\3\2\2\2\u00bd\u00be\5\22\n\2\u00be\u00bf\b\b\1\2"+
-		"\u00bf\u00ca\3\2\2\2\u00c0\u00c1\5\24\13\2\u00c1\u00c2\b\b\1\2\u00c2\u00ca"+
-		"\3\2\2\2\u00c3\u00c4\5\26\f\2\u00c4\u00c5\b\b\1\2\u00c5\u00ca\3\2\2\2"+
-		"\u00c6\u00c7\5\30\r\2\u00c7\u00c8\b\b\1\2\u00c8\u00ca\3\2\2\2\u00c9\u00ba"+
-		"\3\2\2\2\u00c9\u00bd\3\2\2\2\u00c9\u00c0\3\2\2\2\u00c9\u00c3\3\2\2\2\u00c9"+
-		"\u00c6\3\2\2\2\u00ca\17\3\2\2\2\u00cb\u00cc\7\4\2\2\u00cc\u00cd\5\f\7"+
-		"\2\u00cd\u00ce\7\f\2\2\u00ce\u00cf\b\t\1\2\u00cf\21\3\2\2\2\u00d0\u00d1"+
-		"\7\20\2\2\u00d1\u00d2\7\6\2\2\u00d2\u00d3\5\32\16\2\u00d3\u00d4\7\7\2"+
-		"\2\u00d4\u00d5\7\21\2\2\u00d5\u00d6\5\16\b\2\u00d6\u00db\b\n\1\2\u00d7"+
-		"\u00d8\7\22\2\2\u00d8\u00d9\5\16\b\2\u00d9\u00da\b\n\1\2\u00da\u00dc\3"+
-		"\2\2\2\u00db\u00d7\3\2\2\2\u00db\u00dc\3\2\2\2\u00dc\23\3\2\2\2\u00dd"+
-		"\u00de\7\23\2\2\u00de\u00df\7\6\2\2\u00df\u00e0\5\32\16\2\u00e0\u00e1"+
-		"\7\7\2\2\u00e1\u00e2\5\16\b\2\u00e2\u00e3\b\13\1\2\u00e3\25\3\2\2\2\u00e4"+
-		"\u00e5\7\24\2\2\u00e5\u00e6\5\32\16\2\u00e6\u00e7\7\7\2\2\u00e7\u00e8"+
-		"\7\13\2\2\u00e8\u00e9\b\f\1\2\u00e9\27\3\2\2\2\u00ea\u00eb\5\32\16\2\u00eb"+
-		"\u00ec\7\13\2\2\u00ec\u00ed\b\r\1\2\u00ed\31\3\2\2\2\u00ee\u00ef\5\34"+
-		"\17\2\u00ef\u00f0\b\16\1\2\u00f0\33\3\2\2\2\u00f1\u00f2\5\36\20\2\u00f2"+
-		"\u00f3\7\25\2\2\u00f3\u00f4\5\34\17\2\u00f4\u00f5\b\17\1\2\u00f5\u00fa"+
-		"\3\2\2\2\u00f6\u00f7\5\36\20\2\u00f7\u00f8\b\17\1\2\u00f8\u00fa\3\2\2"+
-		"\2\u00f9\u00f1\3\2\2\2\u00f9\u00f6\3\2\2\2\u00fa\35\3\2\2\2\u00fb\u00fc"+
-		"\5\"\22\2\u00fc\u00fd\5 \21\2\u00fd\u00fe\b\20\1\2\u00fe\37\3\2\2\2\u00ff"+
-		"\u0100\7\26\2\2\u0100\u0101\5\"\22\2\u0101\u0102\b\21\1\2\u0102\u0103"+
-		"\5 \21\2\u0103\u0104\b\21\1\2\u0104\u0107\3\2\2\2\u0105\u0107\b\21\1\2"+
-		"\u0106\u00ff\3\2\2\2\u0106\u0105\3\2\2\2\u0107!\3\2\2\2\u0108\u0109\5"+
-		"&\24\2\u0109\u010a\5$\23\2\u010a\u010b\b\22\1\2\u010b#\3\2\2\2\u010c\u010d"+
-		"\7\27\2\2\u010d\u010e\5&\24\2\u010e\u010f\b\23\1\2\u010f\u0110\5$\23\2"+
-		"\u0110\u0111\b\23\1\2\u0111\u0114\3\2\2\2\u0112\u0114\b\23\1\2\u0113\u010c"+
-		"\3\2\2\2\u0113\u0112\3\2\2\2\u0114%\3\2\2\2\u0115\u0116\5*\26\2\u0116"+
-		"\u0117\5(\25\2\u0117\u0118\b\24\1\2\u0118\'\3\2\2\2\u0119\u011e\b\25\1"+
-		"\2\u011a\u011b\7\30\2\2\u011b\u011f\b\25\1\2\u011c\u011d\7\31\2\2\u011d"+
-		"\u011f\b\25\1\2\u011e\u011a\3\2\2\2\u011e\u011c\3\2\2\2\u011f\u0120\3"+
-		"\2\2\2\u0120\u0121\5*\26\2\u0121\u0122\b\25\1\2\u0122\u0123\5(\25\2\u0123"+
-		"\u0124\b\25\1\2\u0124\u0127\3\2\2\2\u0125\u0127\b\25\1\2\u0126\u0119\3"+
-		"\2\2\2\u0126\u0125\3\2\2\2\u0127)\3\2\2\2\u0128\u0129\5.\30\2\u0129\u012a"+
-		"\5,\27\2\u012a\u012b\b\26\1\2\u012b+\3\2\2\2\u012c\u012f\b\27\1\2\u012d"+
-		"\u0130\7\32\2\2\u012e\u0130\7\33\2\2\u012f\u012d\3\2\2\2\u012f\u012e\3"+
-		"\2\2\2\u0130\u0131\3\2\2\2\u0131\u0132\5.\30\2\u0132\u0133\b\27\1\2\u0133"+
-		"\u0134\5,\27\2\u0134\u0135\b\27\1\2\u0135\u0138\3\2\2\2\u0136\u0138\b"+
-		"\27\1\2\u0137\u012c\3\2\2\2\u0137\u0136\3\2\2\2\u0138-\3\2\2\2\u0139\u013a"+
-		"\5\62\32\2\u013a\u013b\5\60\31\2\u013b\u013c\b\30\1\2\u013c/\3\2\2\2\u013d"+
-		"\u0140\b\31\1\2\u013e\u0141\7\34\2\2\u013f\u0141\7\35\2\2\u0140\u013e"+
-		"\3\2\2\2\u0140\u013f\3\2\2\2\u0141\u0142\3\2\2\2\u0142\u0143\5\62\32\2"+
-		"\u0143\u0144\b\31\1\2\u0144\u0145\5\60\31\2\u0145\u0146\b\31\1\2\u0146"+
-		"\u0149\3\2\2\2\u0147\u0149\b\31\1\2\u0148\u013d\3\2\2\2\u0148\u0147\3"+
-		"\2\2\2\u0149\61\3\2\2\2\u014a\u014b\5\66\34\2\u014b\u014c\5\64\33\2\u014c"+
-		"\u014d\b\32\1\2\u014d\63\3\2\2\2\u014e\u0151\b\33\1\2\u014f\u0152\7\36"+
-		"\2\2\u0150\u0152\7\37\2\2\u0151\u014f\3\2\2\2\u0151\u0150\3\2\2\2\u0152"+
-		"\u0153\3\2\2\2\u0153\u0154\5\66\34\2\u0154\u0155\b\33\1\2\u0155\u0156"+
-		"\5\64\33\2\u0156\u0157\b\33\1\2\u0157\u015a\3\2\2\2\u0158\u015a\b\33\1"+
-		"\2\u0159\u014e\3\2\2\2\u0159\u0158\3\2\2\2\u015a\65\3\2\2\2\u015b\u015e"+
-		"\7 \2\2\u015c\u015e\7\35\2\2\u015d\u015b\3\2\2\2\u015d\u015c\3\2\2\2\u015e"+
-		"\u015f\3\2\2\2\u015f\u0160\5\66\34\2\u0160\u0161\b\34\1\2\u0161\u0166"+
-		"\3\2\2\2\u0162\u0163\58\35\2\u0163\u0164\b\34\1\2\u0164\u0166\3\2\2\2"+
-		"\u0165\u015d\3\2\2\2\u0165\u0162\3\2\2\2\u0166\67\3\2\2\2\u0167\u0168"+
-		"\5<\37\2\u0168\u0169\5:\36\2\u0169\u016a\b\35\1\2\u016a9\3\2\2\2\u016b"+
-		"\u016c\7!\2\2\u016c\u016d\5\32\16\2\u016d\u016e\7\"\2\2\u016e\u016f\b"+
-		"\36\1\2\u016f\u0172\3\2\2\2\u0170\u0172\b\36\1\2\u0171\u016b\3\2\2\2\u0171"+
-		"\u0170\3\2\2\2\u0172;\3\2\2\2\u0173\u0174\5@!\2\u0174\u0175\5> \2\u0175"+
-		"\u0176\b\37\1\2\u0176=\3\2\2\2\u0177\u0178\b \1\2\u0178\u018f\7#\2\2\u0179"+
-		"\u017a\7.\2\2\u017a\u017b\7\6\2\2\u017b\u017c\7\7\2\2\u017c\u0190\b \1"+
-		"\2\u017d\u017e\7.\2\2\u017e\u017f\b \1\2\u017f\u0180\7\6\2\2\u0180\u0181"+
-		"\5\32\16\2\u0181\u0188\b \1\2\u0182\u0183\7\17\2\2\u0183\u0184\5\32\16"+
-		"\2\u0184\u0185\b \1\2\u0185\u0187\3\2\2\2\u0186\u0182\3\2\2\2\u0187\u018a"+
-		"\3\2\2\2\u0188\u0186\3\2\2\2\u0188\u0189\3\2\2\2\u0189\u018b\3\2\2\2\u018a"+
-		"\u0188\3\2\2\2\u018b\u018c\7\7\2\2\u018c\u0190\3\2\2\2\u018d\u018e\7$"+
-		"\2\2\u018e\u0190\b \1\2\u018f\u0179\3\2\2\2\u018f\u017d\3\2\2\2\u018f"+
-		"\u018d\3\2\2\2\u0190\u0191\3\2\2\2\u0191\u0192\5> \2\u0192\u0193\b \1"+
-		"\2\u0193\u0196\3\2\2\2\u0194\u0196\b \1\2\u0195\u0177\3\2\2\2\u0195\u0194"+
-		"\3\2\2\2\u0196?\3\2\2\2\u0197\u0198\7+\2\2\u0198\u01ba\b!\1\2\u0199\u019a"+
-		"\7,\2\2\u019a\u01ba\b!\1\2\u019b\u019c\7%\2\2\u019c\u019d\7\t\2\2\u019d"+
-		"\u019e\7!\2\2\u019e\u019f\7+\2\2\u019f\u01a0\7\"\2\2\u01a0\u01ba\b!\1"+
-		"\2\u01a1\u01a2\7%\2\2\u01a2\u01a3\7.\2\2\u01a3\u01a4\7\6\2\2\u01a4\u01a5"+
-		"\7\7\2\2\u01a5\u01ba\b!\1\2\u01a6\u01a7\7&\2\2\u01a7\u01ba\b!\1\2\u01a8"+
-		"\u01a9\7\'\2\2\u01a9\u01ba\b!\1\2\u01aa\u01ab\7(\2\2\u01ab\u01ba\b!\1"+
-		"\2\u01ac\u01ad\7.\2\2\u01ad\u01ba\b!\1\2\u01ae\u01af\7.\2\2\u01af\u01b0"+
-		"\7!\2\2\u01b0\u01b1\5\32\16\2\u01b1\u01b2\7\"\2\2\u01b2\u01b3\b!\1\2\u01b3"+
-		"\u01ba\3\2\2\2\u01b4\u01b5\7\6\2\2\u01b5\u01b6\5\32\16\2\u01b6\u01b7\7"+
-		"\7\2\2\u01b7\u01b8\b!\1\2\u01b8\u01ba\3\2\2\2\u01b9\u0197\3\2\2\2\u01b9"+
-		"\u0199\3\2\2\2\u01b9\u019b\3\2\2\2\u01b9\u01a1\3\2\2\2\u01b9\u01a6\3\2"+
-		"\2\2\u01b9\u01a8\3\2\2\2\u01b9\u01aa\3\2\2\2\u01b9\u01ac\3\2\2\2\u01b9"+
-		"\u01ae\3\2\2\2\u01b9\u01b4\3\2\2\2\u01baA\3\2\2\2\u01bb\u01bc\7\t\2\2"+
-		"\u01bc\u01c8\b\"\1\2\u01bd\u01be\7)\2\2\u01be\u01c8\b\"\1\2\u01bf\u01c0"+
-		"\7*\2\2\u01c0\u01c8\b\"\1\2\u01c1\u01c2\7\t\2\2\u01c2\u01c3\7!\2\2\u01c3"+
-		"\u01c4\7\"\2\2\u01c4\u01c8\b\"\1\2\u01c5\u01c6\7.\2\2\u01c6\u01c8\b\""+
-		"\1\2\u01c7\u01bb\3\2\2\2\u01c7\u01bd\3\2\2\2\u01c7\u01bf\3\2\2\2\u01c7"+
-		"\u01c1\3\2\2\2\u01c7\u01c5\3\2\2\2\u01c8C\3\2\2\2\37Khqy\u0097\u009c\u00a7"+
-		"\u00b7\u00c9\u00db\u00f9\u0106\u0113\u011e\u0126\u012f\u0137\u0140\u0148"+
-		"\u0151\u0159\u015d\u0165\u0171\u0188\u018f\u0195\u01b9\u01c7";
+		"\3\27\3\27\5\27\u0132\n\27\3\27\3\27\3\27\3\27\3\27\3\27\5\27\u013a\n"+
+		"\27\3\30\3\30\3\30\3\30\3\31\3\31\3\31\3\31\3\31\5\31\u0145\n\31\3\31"+
+		"\3\31\3\31\3\31\3\31\3\31\5\31\u014d\n\31\3\32\3\32\3\32\3\32\3\33\3\33"+
+		"\3\33\3\33\3\33\5\33\u0158\n\33\3\33\3\33\3\33\3\33\3\33\3\33\5\33\u0160"+
+		"\n\33\3\34\3\34\3\34\3\34\3\34\5\34\u0167\n\34\3\34\3\34\3\34\3\34\3\34"+
+		"\3\34\5\34\u016f\n\34\3\35\3\35\3\35\3\35\3\36\3\36\3\36\3\36\3\36\3\36"+
+		"\5\36\u017b\n\36\3\37\3\37\3\37\3\37\3 \3 \3 \3 \3 \3 \3 \3 \3 \3 \3 "+
+		"\3 \3 \3 \3 \7 \u0190\n \f \16 \u0193\13 \3 \3 \3 \3 \5 \u0199\n \3 \3"+
+		" \3 \3 \5 \u019f\n \3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3"+
+		"!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\3!\5!\u01c3\n!\3\"\3"+
+		"\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3\"\5\"\u01d1\n\"\3\"\2\2#\2\4"+
+		"\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@B\2\2\2\u01dd"+
+		"\2D\3\2\2\2\4Q\3\2\2\2\6d\3\2\2\2\b~\3\2\2\2\n\u0085\3\2\2\2\f\u00b1\3"+
+		"\2\2\2\16\u00c9\3\2\2\2\20\u00cb\3\2\2\2\22\u00d0\3\2\2\2\24\u00dd\3\2"+
+		"\2\2\26\u00e4\3\2\2\2\30\u00ea\3\2\2\2\32\u00ee\3\2\2\2\34\u00f9\3\2\2"+
+		"\2\36\u00fb\3\2\2\2 \u0106\3\2\2\2\"\u0108\3\2\2\2$\u0113\3\2\2\2&\u0115"+
+		"\3\2\2\2(\u0126\3\2\2\2*\u0128\3\2\2\2,\u0139\3\2\2\2.\u013b\3\2\2\2\60"+
+		"\u014c\3\2\2\2\62\u014e\3\2\2\2\64\u015f\3\2\2\2\66\u016e\3\2\2\28\u0170"+
+		"\3\2\2\2:\u017a\3\2\2\2<\u017c\3\2\2\2>\u019e\3\2\2\2@\u01c2\3\2\2\2B"+
+		"\u01d0\3\2\2\2DE\b\2\1\2EK\5\4\3\2FG\5\6\4\2GH\b\2\1\2HJ\3\2\2\2IF\3\2"+
+		"\2\2JM\3\2\2\2KI\3\2\2\2KL\3\2\2\2LN\3\2\2\2MK\3\2\2\2NO\7\2\2\3OP\b\2"+
+		"\1\2P\3\3\2\2\2QR\7\3\2\2RS\7.\2\2ST\7\4\2\2TU\7\5\2\2UV\7.\2\2VW\7\6"+
+		"\2\2WX\7\7\2\2XY\7\b\2\2YZ\7\t\2\2Z[\b\3\1\2[\\\7\4\2\2\\]\5\f\7\2]^\7"+
+		"\n\2\2^_\5\32\16\2_`\7\13\2\2`a\7\f\2\2ab\7\f\2\2bc\b\3\1\2c\5\3\2\2\2"+
+		"de\7\3\2\2eh\7.\2\2fg\7\r\2\2gi\7.\2\2hf\3\2\2\2hi\3\2\2\2ij\3\2\2\2j"+
+		"k\7\4\2\2kq\b\4\1\2lm\5\b\5\2mn\b\4\1\2np\3\2\2\2ol\3\2\2\2ps\3\2\2\2"+
+		"qo\3\2\2\2qr\3\2\2\2ry\3\2\2\2sq\3\2\2\2tu\5\n\6\2uv\b\4\1\2vx\3\2\2\2"+
+		"wt\3\2\2\2x{\3\2\2\2yw\3\2\2\2yz\3\2\2\2z|\3\2\2\2{y\3\2\2\2|}\7\f\2\2"+
+		"}\7\3\2\2\2~\177\7\16\2\2\177\u0080\7.\2\2\u0080\u0081\7\b\2\2\u0081\u0082"+
+		"\5B\"\2\u0082\u0083\7\13\2\2\u0083\u0084\b\5\1\2\u0084\t\3\2\2\2\u0085"+
+		"\u0086\7\5\2\2\u0086\u0087\7.\2\2\u0087\u009c\b\6\1\2\u0088\u0089\7\6"+
+		"\2\2\u0089\u009d\7\7\2\2\u008a\u008b\7\6\2\2\u008b\u008c\7.\2\2\u008c"+
+		"\u008d\7\b\2\2\u008d\u008e\5B\"\2\u008e\u0097\b\6\1\2\u008f\u0090\7\17"+
+		"\2\2\u0090\u0091\7.\2\2\u0091\u0092\7\b\2\2\u0092\u0093\5B\"\2\u0093\u0094"+
+		"\b\6\1\2\u0094\u0096\3\2\2\2\u0095\u008f\3\2\2\2\u0096\u0099\3\2\2\2\u0097"+
+		"\u0095\3\2\2\2\u0097\u0098\3\2\2\2\u0098\u009a\3\2\2\2\u0099\u0097\3\2"+
+		"\2\2\u009a\u009b\7\7\2\2\u009b\u009d\3\2\2\2\u009c\u0088\3\2\2\2\u009c"+
+		"\u008a\3\2\2\2\u009d\u009e\3\2\2\2\u009e\u009f\7\b\2\2\u009f\u00a0\5B"+
+		"\"\2\u00a0\u00a1\b\6\1\2\u00a1\u00a7\7\4\2\2\u00a2\u00a3\5\b\5\2\u00a3"+
+		"\u00a4\b\6\1\2\u00a4\u00a6\3\2\2\2\u00a5\u00a2\3\2\2\2\u00a6\u00a9\3\2"+
+		"\2\2\u00a7\u00a5\3\2\2\2\u00a7\u00a8\3\2\2\2\u00a8\u00aa\3\2\2\2\u00a9"+
+		"\u00a7\3\2\2\2\u00aa\u00ab\5\f\7\2\u00ab\u00ac\7\n\2\2\u00ac\u00ad\5\32"+
+		"\16\2\u00ad\u00ae\7\13\2\2\u00ae\u00af\7\f\2\2\u00af\u00b0\b\6\1\2\u00b0"+
+		"\13\3\2\2\2\u00b1\u00b7\b\7\1\2\u00b2\u00b3\5\16\b\2\u00b3\u00b4\b\7\1"+
+		"\2\u00b4\u00b6\3\2\2\2\u00b5\u00b2\3\2\2\2\u00b6\u00b9\3\2\2\2\u00b7\u00b5"+
+		"\3\2\2\2\u00b7\u00b8\3\2\2\2\u00b8\r\3\2\2\2\u00b9\u00b7\3\2\2\2\u00ba"+
+		"\u00bb\5\20\t\2\u00bb\u00bc\b\b\1\2\u00bc\u00ca\3\2\2\2\u00bd\u00be\5"+
+		"\22\n\2\u00be\u00bf\b\b\1\2\u00bf\u00ca\3\2\2\2\u00c0\u00c1\5\24\13\2"+
+		"\u00c1\u00c2\b\b\1\2\u00c2\u00ca\3\2\2\2\u00c3\u00c4\5\26\f\2\u00c4\u00c5"+
+		"\b\b\1\2\u00c5\u00ca\3\2\2\2\u00c6\u00c7\5\30\r\2\u00c7\u00c8\b\b\1\2"+
+		"\u00c8\u00ca\3\2\2\2\u00c9\u00ba\3\2\2\2\u00c9\u00bd\3\2\2\2\u00c9\u00c0"+
+		"\3\2\2\2\u00c9\u00c3\3\2\2\2\u00c9\u00c6\3\2\2\2\u00ca\17\3\2\2\2\u00cb"+
+		"\u00cc\7\4\2\2\u00cc\u00cd\5\f\7\2\u00cd\u00ce\7\f\2\2\u00ce\u00cf\b\t"+
+		"\1\2\u00cf\21\3\2\2\2\u00d0\u00d1\7\20\2\2\u00d1\u00d2\7\6\2\2\u00d2\u00d3"+
+		"\5\32\16\2\u00d3\u00d4\7\7\2\2\u00d4\u00d5\7\21\2\2\u00d5\u00d6\5\16\b"+
+		"\2\u00d6\u00db\b\n\1\2\u00d7\u00d8\7\22\2\2\u00d8\u00d9\5\16\b\2\u00d9"+
+		"\u00da\b\n\1\2\u00da\u00dc\3\2\2\2\u00db\u00d7\3\2\2\2\u00db\u00dc\3\2"+
+		"\2\2\u00dc\23\3\2\2\2\u00dd\u00de\7\23\2\2\u00de\u00df\7\6\2\2\u00df\u00e0"+
+		"\5\32\16\2\u00e0\u00e1\7\7\2\2\u00e1\u00e2\5\16\b\2\u00e2\u00e3\b\13\1"+
+		"\2\u00e3\25\3\2\2\2\u00e4\u00e5\7\24\2\2\u00e5\u00e6\5\32\16\2\u00e6\u00e7"+
+		"\7\7\2\2\u00e7\u00e8\7\13\2\2\u00e8\u00e9\b\f\1\2\u00e9\27\3\2\2\2\u00ea"+
+		"\u00eb\5\32\16\2\u00eb\u00ec\7\13\2\2\u00ec\u00ed\b\r\1\2\u00ed\31\3\2"+
+		"\2\2\u00ee\u00ef\5\34\17\2\u00ef\u00f0\b\16\1\2\u00f0\33\3\2\2\2\u00f1"+
+		"\u00f2\5\36\20\2\u00f2\u00f3\7\25\2\2\u00f3\u00f4\5\34\17\2\u00f4\u00f5"+
+		"\b\17\1\2\u00f5\u00fa\3\2\2\2\u00f6\u00f7\5\36\20\2\u00f7\u00f8\b\17\1"+
+		"\2\u00f8\u00fa\3\2\2\2\u00f9\u00f1\3\2\2\2\u00f9\u00f6\3\2\2\2\u00fa\35"+
+		"\3\2\2\2\u00fb\u00fc\5\"\22\2\u00fc\u00fd\5 \21\2\u00fd\u00fe\b\20\1\2"+
+		"\u00fe\37\3\2\2\2\u00ff\u0100\7\26\2\2\u0100\u0101\5\"\22\2\u0101\u0102"+
+		"\b\21\1\2\u0102\u0103\5 \21\2\u0103\u0104\b\21\1\2\u0104\u0107\3\2\2\2"+
+		"\u0105\u0107\b\21\1\2\u0106\u00ff\3\2\2\2\u0106\u0105\3\2\2\2\u0107!\3"+
+		"\2\2\2\u0108\u0109\5&\24\2\u0109\u010a\5$\23\2\u010a\u010b\b\22\1\2\u010b"+
+		"#\3\2\2\2\u010c\u010d\7\27\2\2\u010d\u010e\5&\24\2\u010e\u010f\b\23\1"+
+		"\2\u010f\u0110\5$\23\2\u0110\u0111\b\23\1\2\u0111\u0114\3\2\2\2\u0112"+
+		"\u0114\b\23\1\2\u0113\u010c\3\2\2\2\u0113\u0112\3\2\2\2\u0114%\3\2\2\2"+
+		"\u0115\u0116\5*\26\2\u0116\u0117\5(\25\2\u0117\u0118\b\24\1\2\u0118\'"+
+		"\3\2\2\2\u0119\u011e\b\25\1\2\u011a\u011b\7\30\2\2\u011b\u011f\b\25\1"+
+		"\2\u011c\u011d\7\31\2\2\u011d\u011f\b\25\1\2\u011e\u011a\3\2\2\2\u011e"+
+		"\u011c\3\2\2\2\u011f\u0120\3\2\2\2\u0120\u0121\5*\26\2\u0121\u0122\b\25"+
+		"\1\2\u0122\u0123\5(\25\2\u0123\u0124\b\25\1\2\u0124\u0127\3\2\2\2\u0125"+
+		"\u0127\b\25\1\2\u0126\u0119\3\2\2\2\u0126\u0125\3\2\2\2\u0127)\3\2\2\2"+
+		"\u0128\u0129\5.\30\2\u0129\u012a\5,\27\2\u012a\u012b\b\26\1\2\u012b+\3"+
+		"\2\2\2\u012c\u0131\b\27\1\2\u012d\u012e\7\32\2\2\u012e\u0132\b\27\1\2"+
+		"\u012f\u0130\7\33\2\2\u0130\u0132\b\27\1\2\u0131\u012d\3\2\2\2\u0131\u012f"+
+		"\3\2\2\2\u0132\u0133\3\2\2\2\u0133\u0134\5.\30\2\u0134\u0135\b\27\1\2"+
+		"\u0135\u0136\5,\27\2\u0136\u0137\b\27\1\2\u0137\u013a\3\2\2\2\u0138\u013a"+
+		"\b\27\1\2\u0139\u012c\3\2\2\2\u0139\u0138\3\2\2\2\u013a-\3\2\2\2\u013b"+
+		"\u013c\5\62\32\2\u013c\u013d\5\60\31\2\u013d\u013e\b\30\1\2\u013e/\3\2"+
+		"\2\2\u013f\u0144\b\31\1\2\u0140\u0141\7\34\2\2\u0141\u0145\b\31\1\2\u0142"+
+		"\u0143\7\35\2\2\u0143\u0145\b\31\1\2\u0144\u0140\3\2\2\2\u0144\u0142\3"+
+		"\2\2\2\u0145\u0146\3\2\2\2\u0146\u0147\5\62\32\2\u0147\u0148\b\31\1\2"+
+		"\u0148\u0149\5\60\31\2\u0149\u014a\b\31\1\2\u014a\u014d\3\2\2\2\u014b"+
+		"\u014d\b\31\1\2\u014c\u013f\3\2\2\2\u014c\u014b\3\2\2\2\u014d\61\3\2\2"+
+		"\2\u014e\u014f\5\66\34\2\u014f\u0150\5\64\33\2\u0150\u0151\b\32\1\2\u0151"+
+		"\63\3\2\2\2\u0152\u0157\b\33\1\2\u0153\u0154\7\36\2\2\u0154\u0158\b\33"+
+		"\1\2\u0155\u0156\7\37\2\2\u0156\u0158\b\33\1\2\u0157\u0153\3\2\2\2\u0157"+
+		"\u0155\3\2\2\2\u0158\u0159\3\2\2\2\u0159\u015a\5\66\34\2\u015a\u015b\b"+
+		"\33\1\2\u015b\u015c\5\64\33\2\u015c\u015d\b\33\1\2\u015d\u0160\3\2\2\2"+
+		"\u015e\u0160\b\33\1\2\u015f\u0152\3\2\2\2\u015f\u015e\3\2\2\2\u0160\65"+
+		"\3\2\2\2\u0161\u0166\b\34\1\2\u0162\u0163\7 \2\2\u0163\u0167\b\34\1\2"+
+		"\u0164\u0165\7\35\2\2\u0165\u0167\b\34\1\2\u0166\u0162\3\2\2\2\u0166\u0164"+
+		"\3\2\2\2\u0167\u0168\3\2\2\2\u0168\u0169\5\66\34\2\u0169\u016a\b\34\1"+
+		"\2\u016a\u016f\3\2\2\2\u016b\u016c\58\35\2\u016c\u016d\b\34\1\2\u016d"+
+		"\u016f\3\2\2\2\u016e\u0161\3\2\2\2\u016e\u016b\3\2\2\2\u016f\67\3\2\2"+
+		"\2\u0170\u0171\5<\37\2\u0171\u0172\5:\36\2\u0172\u0173\b\35\1\2\u0173"+
+		"9\3\2\2\2\u0174\u0175\7!\2\2\u0175\u0176\5\32\16\2\u0176\u0177\7\"\2\2"+
+		"\u0177\u0178\b\36\1\2\u0178\u017b\3\2\2\2\u0179\u017b\b\36\1\2\u017a\u0174"+
+		"\3\2\2\2\u017a\u0179\3\2\2\2\u017b;\3\2\2\2\u017c\u017d\5@!\2\u017d\u017e"+
+		"\5> \2\u017e\u017f\b\37\1\2\u017f=\3\2\2\2\u0180\u0181\b \1\2\u0181\u0198"+
+		"\7#\2\2\u0182\u0183\7.\2\2\u0183\u0184\b \1\2\u0184\u0185\7\6\2\2\u0185"+
+		"\u0199\7\7\2\2\u0186\u0187\7.\2\2\u0187\u0188\b \1\2\u0188\u0189\7\6\2"+
+		"\2\u0189\u018a\5\32\16\2\u018a\u0191\b \1\2\u018b\u018c\7\17\2\2\u018c"+
+		"\u018d\5\32\16\2\u018d\u018e\b \1\2\u018e\u0190\3\2\2\2\u018f\u018b\3"+
+		"\2\2\2\u0190\u0193\3\2\2\2\u0191\u018f\3\2\2\2\u0191\u0192\3\2\2\2\u0192"+
+		"\u0194\3\2\2\2\u0193\u0191\3\2\2\2\u0194\u0195\7\7\2\2\u0195\u0199\3\2"+
+		"\2\2\u0196\u0197\7$\2\2\u0197\u0199\b \1\2\u0198\u0182\3\2\2\2\u0198\u0186"+
+		"\3\2\2\2\u0198\u0196\3\2\2\2\u0199\u019a\3\2\2\2\u019a\u019b\5> \2\u019b"+
+		"\u019c\b \1\2\u019c\u019f\3\2\2\2\u019d\u019f\b \1\2\u019e\u0180\3\2\2"+
+		"\2\u019e\u019d\3\2\2\2\u019f?\3\2\2\2\u01a0\u01a1\7+\2\2\u01a1\u01c3\b"+
+		"!\1\2\u01a2\u01a3\7,\2\2\u01a3\u01c3\b!\1\2\u01a4\u01a5\7%\2\2\u01a5\u01a6"+
+		"\7\t\2\2\u01a6\u01a7\7!\2\2\u01a7\u01a8\7+\2\2\u01a8\u01a9\7\"\2\2\u01a9"+
+		"\u01c3\b!\1\2\u01aa\u01ab\7%\2\2\u01ab\u01ac\7.\2\2\u01ac\u01ad\7\6\2"+
+		"\2\u01ad\u01ae\7\7\2\2\u01ae\u01c3\b!\1\2\u01af\u01b0\7&\2\2\u01b0\u01c3"+
+		"\b!\1\2\u01b1\u01b2\7\'\2\2\u01b2\u01c3\b!\1\2\u01b3\u01b4\7(\2\2\u01b4"+
+		"\u01c3\b!\1\2\u01b5\u01b6\7.\2\2\u01b6\u01c3\b!\1\2\u01b7\u01b8\7.\2\2"+
+		"\u01b8\u01b9\7!\2\2\u01b9\u01ba\5\32\16\2\u01ba\u01bb\7\"\2\2\u01bb\u01bc"+
+		"\b!\1\2\u01bc\u01c3\3\2\2\2\u01bd\u01be\7\6\2\2\u01be\u01bf\5\32\16\2"+
+		"\u01bf\u01c0\7\7\2\2\u01c0\u01c1\b!\1\2\u01c1\u01c3\3\2\2\2\u01c2\u01a0"+
+		"\3\2\2\2\u01c2\u01a2\3\2\2\2\u01c2\u01a4\3\2\2\2\u01c2\u01aa\3\2\2\2\u01c2"+
+		"\u01af\3\2\2\2\u01c2\u01b1\3\2\2\2\u01c2\u01b3\3\2\2\2\u01c2\u01b5\3\2"+
+		"\2\2\u01c2\u01b7\3\2\2\2\u01c2\u01bd\3\2\2\2\u01c3A\3\2\2\2\u01c4\u01c5"+
+		"\7\t\2\2\u01c5\u01d1\b\"\1\2\u01c6\u01c7\7)\2\2\u01c7\u01d1\b\"\1\2\u01c8"+
+		"\u01c9\7*\2\2\u01c9\u01d1\b\"\1\2\u01ca\u01cb\7\t\2\2\u01cb\u01cc\7!\2"+
+		"\2\u01cc\u01cd\7\"\2\2\u01cd\u01d1\b\"\1\2\u01ce\u01cf\7.\2\2\u01cf\u01d1"+
+		"\b\"\1\2\u01d0\u01c4\3\2\2\2\u01d0\u01c6\3\2\2\2\u01d0\u01c8\3\2\2\2\u01d0"+
+		"\u01ca\3\2\2\2\u01d0\u01ce\3\2\2\2\u01d1C\3\2\2\2\37Khqy\u0097\u009c\u00a7"+
+		"\u00b7\u00c9\u00db\u00f9\u0106\u0113\u011e\u0126\u0131\u0139\u0144\u014c"+
+		"\u0157\u015f\u0166\u016e\u017a\u0191\u0198\u019e\u01c2\u01d0";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

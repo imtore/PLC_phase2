@@ -41,14 +41,18 @@ grammar Smoola;
                 main_method.addStatement($body.stmtlist.get(counter));
             }
             main_method.setReturnValue($return_value.expobj);
-            $mainclassobj = new ClassDeclaration(new Identifier($class_name.getText()),null);
+            $mainclassobj = new ClassDeclaration(new Identifier($class_name.getText()),new Identifier(""));
+
             $mainclassobj.addMethodDeclaration(main_method);
+            print("here7");
+
         }
     ;
     classDeclaration returns [ClassDeclaration classdecobj]:
         'class' class_name = ID ('extends' parent_name = ID)? '{'
         {
             $classdecobj = new ClassDeclaration(new Identifier($class_name.getText()), new Identifier($parent_name.getText()));
+            print("here2");
         }
         (var = varDeclaration {$classdecobj.addVarDeclaration($var.vardecobj);})*
         (method = methodDeclaration{$classdecobj.addMethodDeclaration($method.methoddecobj);})* '}'
@@ -130,11 +134,11 @@ grammar Smoola;
         exp = expression ';'
         {
             if($exp.isAssignStatement){
-                $asgnobj = new Assign($exp.expobj.getLeft(), $exp.expobj.getRight());
+                $asgnobj = new Assign(((BinaryExpression)$exp.expobj).getLeft(), ((BinaryExpression)$exp.expobj).getRight());
             }
             else
             {
-                $asgnobj = new Assign(null, $exp.expobj.getRight());
+                $asgnobj = new Assign(null, ((BinaryExpression)$exp.expobj).getRight());
             }
         }
     ;
@@ -151,12 +155,12 @@ grammar Smoola;
 		expleft = expressionOr '=' expright = expressionAssignment
 		{
 		    $expasgn = new BinaryExpression($expleft.expor, $expright.expasgn, BinaryOperator.assign);
-		    $isAssignExp = True;
+		    $isAssignExp = true;
 		}
 	    |	exp = expressionOr
 	    {
 	        $expasgn = $exp.expor;
-	        $isAssignExp = False;
+	        $isAssignExp = false;
 	    }
 	;
 
@@ -201,7 +205,7 @@ grammar Smoola;
             Boolean eq;
             Expression leftmostexp;
         }
-		('==' {eq = True;}| '<>' {eq = False;}) expright = expressionCmp
+		('==' {eq = true;}| '<>' {eq = false;}) expright = expressionCmp
 		{
 		    if(eq)
 		    {
@@ -227,10 +231,11 @@ grammar Smoola;
     expressionCmpTemp [Expression leftside] returns [Expression fullexp]:
         {
             Expression leftmostexp;
+            Boolean lt;
         }
-		(op = '<' | op = '>') expright = expressionAdd
+		('<' {lt = true;}| '>' {lt = false;}) expright = expressionAdd
 		{
-		    if($op == '<')
+		    if(lt)
             {
                 leftmostexp = new BinaryExpression($leftside, $expright.expadd, BinaryOperator.lt);
             }
@@ -253,10 +258,11 @@ grammar Smoola;
     expressionAddTemp [Expression leftside] returns [Expression fullexp]:
         {
             Expression leftmostexp;
+            Boolean add;
         }
-		(op = '+' | op = '-') expright = expressionMult
+		('+' {add = true;}| '-' {add = false;}) expright = expressionMult
 		{
-		    if($op == '+')
+		    if(add)
             {
                 leftmostexp = new BinaryExpression($leftside, $expright.expmult, BinaryOperator.add);
             }
@@ -279,10 +285,11 @@ grammar Smoola;
     expressionMultTemp[Expression leftside] returns [Expression fullexp]:
         {
             Expression leftmostexp;
+            Boolean mult;
         }
-		(op = '*' | op = '/') expright = expressionUnary
+		('*' {mult = true;}| '/'{mult = false;}) expright = expressionUnary
 		{
-		    if($op == '*')
+		    if(mult)
             {
                 leftmostexp = new BinaryExpression($leftside, $expright.expun, BinaryOperator.mult);
             }
@@ -299,9 +306,12 @@ grammar Smoola;
 	;
 
     expressionUnary returns [Expression expun]:
-		(op = '!' | op = '-') exp1 = expressionUnary
+        {
+            Boolean not;
+        }
+		('!' {not = true;} | '-' {not = false;}) exp1 = expressionUnary
 		{
-		    if(op == '!'){
+		    if(not){
 		        $expun = new UnaryExpression(UnaryOperator.not, $exp1.expun);
 		    }
 		    else
@@ -325,20 +335,21 @@ grammar Smoola;
 	;
 	expressionMethodsTemp [Expression instance] returns [Expression fullexp]:
 	    {
-	        Expression next_instance;
+	        Expression next_instance = null;
 	    }
 	    '.'
 	    (
-	    method_name = ID '(' ')'
+	    method_name = ID
 	    {
-	        next_instance = new MethodCall($instance, new Identifier($method_name.getText()));
-	    }
+            next_instance = new MethodCall($instance, new Identifier($method_name.getText()));
+        }
+        '(' ')'
 	    |
 	    method_name = ID
 	    {
 	        next_instance = new MethodCall($instance, new Identifier($method_name.getText()));
 	    }
-	    '(' (arg = expression{next_instance.addArg($arg.expobj);} (',' arg = expression {next_instance.addArg($arg.expobj);})*) ')'
+	    '(' (first_arg = expression{((MethodCall)next_instance).addArg($first_arg.expobj);} (',' arg = expression {((MethodCall)next_instance).addArg($arg.expobj);})*) ')'
 	    |
 	    'length'
 	    {
@@ -349,9 +360,9 @@ grammar Smoola;
 	    |{$fullexp = $instance;}
 	;
     expressionOther returns [Expression expotherobj]:
-		const_int = CONST_NUM { $expotherobj = new IntValue($const_int, new IntType());}
+		const_int = CONST_NUM { $expotherobj = new IntValue(Integer.parseInt($const_int.getText()), new IntType());}
         |	const_string = CONST_STR { $expotherobj = new StringValue($const_string.getText(), new StringType());}
-        |   'new ' 'int' '[' size = CONST_NUM ']' { $expotherobj = new NewArray(); $expotherobj.setExpression(new IntValue($size,new IntType()));}
+        |   'new ' 'int' '[' size = CONST_NUM ']' { $expotherobj = new NewArray(); ((NewArray)$expotherobj).setExpression(new IntValue(Integer.parseInt($size.getText()),new IntType()));}
         |   'new ' instance_name = ID '(' ')' { $expotherobj = new NewClass(new Identifier($instance_name.getText()));}
         |   'this' { $expotherobj = new This();}
         |   'true' { $expotherobj = new BooleanValue(true, new BooleanType());}
@@ -369,7 +380,7 @@ grammar Smoola;
 	    |   id = ID
 	    {
 	        $typeobj = new UserDefinedType();
-	        $typeobj.setName(new Identifier($id.getText()));
+	        ((UserDefinedType)$typeobj).setName(new Identifier($id.getText()));
 	    }
 	;
     CONST_NUM:
