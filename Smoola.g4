@@ -42,17 +42,22 @@ grammar Smoola;
             }
             main_method.setReturnValue($return_value.expobj);
             $mainclassobj = new ClassDeclaration(new Identifier($class_name.getText()),new Identifier(""));
-
             $mainclassobj.addMethodDeclaration(main_method);
-            print("here7");
-
         }
     ;
     classDeclaration returns [ClassDeclaration classdecobj]:
-        'class' class_name = ID ('extends' parent_name = ID)? '{'
         {
-            $classdecobj = new ClassDeclaration(new Identifier($class_name.getText()), new Identifier($parent_name.getText()));
-            print("here2");
+            Boolean has_parent = false;
+        }
+        'class' class_name = ID ('extends' parent_name = ID {has_parent = true;})? '{'
+        {
+            if(has_parent){
+                $classdecobj = new ClassDeclaration(new Identifier($class_name.getText()), new Identifier($parent_name.getText()));
+            }
+            else
+            {
+                $classdecobj = new ClassDeclaration(new Identifier($class_name.getText()), new Identifier(""));
+            }
         }
         (var = varDeclaration {$classdecobj.addVarDeclaration($var.vardecobj);})*
         (method = methodDeclaration{$classdecobj.addMethodDeclaration($method.methoddecobj);})* '}'
@@ -64,13 +69,16 @@ grammar Smoola;
         }
     ;
     methodDeclaration returns [MethodDeclaration methoddecobj]:
-        'def' method_name = ID {$methoddecobj = new MethodDeclaration(new Identifier($method_name.getText()));}
+        'def' method_name = ID
+        {
+            $methoddecobj = new MethodDeclaration(new Identifier($method_name.getText()));
+        }
         ('(' ')'
         |
         (
-        '(' arg_name = ID ':' arg_type = type
+        '(' arg_name = ID ':' argtype = type
         {
-            $methoddecobj.addArg(new VarDeclaration(new Identifier($arg_name.getText()), $argtype.typeobj));
+            $methoddecobj.addArg(new VarDeclaration( new Identifier($arg_name.getText()) , $argtype.typeobj));
         }
         (',' arg_name = ID ':' argtype = type
         {
@@ -373,7 +381,7 @@ grammar Smoola;
         |	'(' exp = expression ')' {$expotherobj = $exp.expobj;}
 	;
 	type returns [Type typeobj]:
-	    'int' {$typeobj = new IntType();}
+	    'int' {$typeobj = new IntType(); }
 	    |   'boolean'  {$typeobj = new BooleanType();}
 	    |   'string'  {$typeobj = new StringType();}
 	    |   'int' '[' ']'  {$typeobj = new ArrayType();}
